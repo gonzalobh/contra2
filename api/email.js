@@ -115,12 +115,14 @@ Prefer:
 - "Nos gustaría"
 - "Quedamos a la espera"
 - "Un saludo"
+- "¡Enhorabuena!" for congratulations
 
 Avoid:
 - "se encuentren"
 - "cordialmente"
 - "estimado cliente"
 - overly warm LATAM tone
+- "¡Felicidades!" (too LATAM for formal Spain context)
 
 Write concisely. Spain uses shorter, more direct phrasing.
 
@@ -134,9 +136,12 @@ Prefer:
 - "Con gusto"
 - "Quedamos atentos"
 - "Saludos cordiales"
+- "¡Felicidades!" or "¡Muchas felicidades!" for congratulations
 
 Allow polite cushioning language common in Mexico.
-Do NOT use Spain phrasing like "Un saludo" or "Quedamos a la espera".
+Do NOT use Spain phrasing like "Un saludo", "Quedamos a la espera", "Enhorabuena", "Un cordial saludo".
+Avoid peninsular vocabulary: "ordenador", "móvil", "vale", "enhorabuena", "genial".
+Use Mexican equivalents: "computadora", "celular", "cotización".
 
 ---
 
@@ -148,9 +153,43 @@ Prefer:
 - "Junto con saludar"
 - "Quedamos atentos"
 - "Saludos"
+- "¡Felicitaciones!" or "¡Felicidades!" for congratulations
 
 Avoid Mexican warmth and avoid Spain brevity.
+Avoid peninsular expressions: "enhorabuena", "ordenador", "un saludo".
 Balance clarity + formality.
+
+---
+
+If Target Region is Colombia:
+Use Colombian professional Spanish.
+Tone formal, respectful and cordial.
+Prefer:
+- "Cordial saludo"
+- "Estimado/a"
+- "Cordialmente"
+- "Quedo atento/a"
+- "¡Felicitaciones!" for congratulations
+
+Avoid peninsular expressions: "enhorabuena", "ordenador", "un saludo", "vale".
+Use Colombian vocabulary: "computador", "celular", "cotización".
+
+---
+
+If Target Region is Argentina:
+Use Argentine professional Spanish.
+Tone direct but warm.
+In formal context: use usted, no voseo.
+In informal/close context: voseo is acceptable (vos/tenés/podés).
+Prefer:
+- "Estimado/a"
+- "Buen día"
+- "Quedo a disposición"
+- "Saludos"
+- "¡Felicitaciones!" for congratulations
+
+Avoid peninsular expressions: "enhorabuena", "ordenador", "un saludo".
+Avoid lunfardo or overly colloquial language: "che", "boludo", "bárbaro".
 
 ---
 
