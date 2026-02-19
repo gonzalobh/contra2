@@ -3957,6 +3957,7 @@
       if (typeof entry.instruction === 'string') {
         instructionEl.value = entry.instruction;
         charCount.textContent = instructionEl.value.length;
+        stopInstructionHint();
       }
     }
 
