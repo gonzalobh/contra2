@@ -27,7 +27,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.ORTO}`,
+        Authorization: `Bearer ${process.env.CONTRA}`,
       },
       body: JSON.stringify({
         model: "gpt-4o",
