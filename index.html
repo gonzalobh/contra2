@@ -3023,15 +3023,23 @@
 
     // Fullscreen panel
     let fullscreenOverlay = null;
+    let panelOriginalParent = null;
+    let panelOriginalNextSibling = null;
     function enterFullscreenPanel() {
       const panel = document.querySelector('.right-panel');
       if (!panel) return;
+      // Remember original position
+      panelOriginalParent = panel.parentNode;
+      panelOriginalNextSibling = panel.nextSibling;
+      // Create overlay
       fullscreenOverlay = document.createElement('div');
       fullscreenOverlay.className = 'fullscreen-overlay';
       fullscreenOverlay.addEventListener('click', (e) => {
         if (e.target === fullscreenOverlay) exitFullscreenPanel();
       });
       document.body.appendChild(fullscreenOverlay);
+      // Move panel to body so it's above overlay
+      document.body.appendChild(panel);
       requestAnimationFrame(() => fullscreenOverlay.classList.add('active'));
       panel.classList.add('is-fullscreen');
       const btn = document.getElementById('fullscreenPanelBtn');
@@ -3043,11 +3051,23 @@
     }
     function exitFullscreenPanel() {
       const panel = document.querySelector('.right-panel');
-      if (panel) panel.classList.remove('is-fullscreen');
+      if (panel) {
+        panel.classList.remove('is-fullscreen');
+        // Move panel back to original position
+        if (panelOriginalParent) {
+          if (panelOriginalNextSibling) {
+            panelOriginalParent.insertBefore(panel, panelOriginalNextSibling);
+          } else {
+            panelOriginalParent.appendChild(panel);
+          }
+        }
+      }
       if (fullscreenOverlay) {
         fullscreenOverlay.classList.remove('active');
         setTimeout(() => { fullscreenOverlay?.remove(); fullscreenOverlay = null; }, 250);
       }
+      panelOriginalParent = null;
+      panelOriginalNextSibling = null;
       const btn = document.getElementById('fullscreenPanelBtn');
       if (btn) {
         btn.title = 'Pantalla completa';
