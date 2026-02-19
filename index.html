@@ -1493,6 +1493,50 @@
       height: 18px;
     }
 
+    .panel-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    /* Fullscreen modal */
+    .fullscreen-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .fullscreen-overlay.active {
+      opacity: 1;
+    }
+    .right-panel.is-fullscreen {
+      position: fixed !important;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) !important;
+      width: calc(100% - 80px) !important;
+      max-width: 860px;
+      height: calc(100vh - 60px) !important;
+      min-height: unset !important;
+      z-index: 10000 !important;
+      display: block !important;
+      opacity: 1 !important;
+      border-radius: 16px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
+      margin: 0 !important;
+    }
+    .right-panel.is-fullscreen .output-header {
+      border-radius: 16px 16px 0 0;
+    }
+
     .output-header-top {
       width: 100%;
       display: flex;
@@ -2931,9 +2975,14 @@
           <div class="output-header">
             <div class="output-header-row">
               <h2>Resultados</h2>
-              <button id="closeRightPanelBtn" class="icon-btn close-panel-btn" type="button" title="Cerrar panel">
-                <i data-lucide="x"></i>
-              </button>
+              <div class="panel-header-actions">
+                <button id="fullscreenPanelBtn" class="icon-btn close-panel-btn" type="button" title="Pantalla completa">
+                  <i data-lucide="maximize-2"></i>
+                </button>
+                <button id="closeRightPanelBtn" class="icon-btn close-panel-btn" type="button" title="Cerrar panel">
+                  <i data-lucide="x"></i>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -2966,7 +3015,51 @@
 
     // Close right panel button
     document.getElementById('closeRightPanelBtn')?.addEventListener('click', () => {
+      if (document.querySelector('.right-panel.is-fullscreen')) {
+        exitFullscreenPanel();
+      }
       mainContent.classList.remove('has-results');
+    });
+
+    // Fullscreen panel
+    let fullscreenOverlay = null;
+    function enterFullscreenPanel() {
+      const panel = document.querySelector('.right-panel');
+      if (!panel) return;
+      fullscreenOverlay = document.createElement('div');
+      fullscreenOverlay.className = 'fullscreen-overlay';
+      fullscreenOverlay.addEventListener('click', (e) => {
+        if (e.target === fullscreenOverlay) exitFullscreenPanel();
+      });
+      document.body.appendChild(fullscreenOverlay);
+      requestAnimationFrame(() => fullscreenOverlay.classList.add('active'));
+      panel.classList.add('is-fullscreen');
+      const btn = document.getElementById('fullscreenPanelBtn');
+      if (btn) {
+        btn.title = 'Salir de pantalla completa';
+        const icon = btn.querySelector('i');
+        if (icon) { icon.setAttribute('data-lucide', 'minimize-2'); lucide.createIcons(); }
+      }
+    }
+    function exitFullscreenPanel() {
+      const panel = document.querySelector('.right-panel');
+      if (panel) panel.classList.remove('is-fullscreen');
+      if (fullscreenOverlay) {
+        fullscreenOverlay.classList.remove('active');
+        setTimeout(() => { fullscreenOverlay?.remove(); fullscreenOverlay = null; }, 250);
+      }
+      const btn = document.getElementById('fullscreenPanelBtn');
+      if (btn) {
+        btn.title = 'Pantalla completa';
+        const icon = btn.querySelector('i');
+        if (icon) { icon.setAttribute('data-lucide', 'maximize-2'); lucide.createIcons(); }
+      }
+    }
+    document.getElementById('fullscreenPanelBtn')?.addEventListener('click', () => {
+      document.querySelector('.right-panel.is-fullscreen') ? exitFullscreenPanel() : enterFullscreenPanel();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.querySelector('.right-panel.is-fullscreen')) exitFullscreenPanel();
     });
     let historyListEl = null;
     let historySearchInput = null;
