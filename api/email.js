@@ -26,7 +26,7 @@ async function callOpenAI({ model = "gpt-4o", temperature = 0.3, systemPrompt, u
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.ORTO}`,
+      Authorization: `Bearer ${process.env.CONTRA}`,
     },
     body: JSON.stringify(body),
   });
