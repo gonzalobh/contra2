@@ -3049,14 +3049,14 @@
       const btn = document.getElementById('fullscreenPanelBtn');
       if (btn) {
         btn.title = 'Salir de pantalla completa';
-        const icon = btn.querySelector('i');
-        if (icon) { icon.setAttribute('data-lucide', 'minimize-2'); lucide.createIcons(); }
+        btn.innerHTML = '<i data-lucide="minimize-2"></i>';
+        lucide.createIcons();
       }
       const closeBtn = document.getElementById('closeRightPanelBtn');
       if (closeBtn) {
         closeBtn.title = 'Salir de pantalla completa';
-        const closeIcon = closeBtn.querySelector('i');
-        if (closeIcon) { closeIcon.setAttribute('data-lucide', 'minimize-2'); lucide.createIcons(); }
+        closeBtn.innerHTML = '<i data-lucide="minimize-2"></i>';
+        lucide.createIcons();
       }
     }
     function exitFullscreenPanel() {
@@ -3081,14 +3081,14 @@
       const btn = document.getElementById('fullscreenPanelBtn');
       if (btn) {
         btn.title = 'Pantalla completa';
-        const icon = btn.querySelector('i');
-        if (icon) { icon.setAttribute('data-lucide', 'maximize-2'); lucide.createIcons(); }
+        btn.innerHTML = '<i data-lucide="maximize-2"></i>';
+        lucide.createIcons();
       }
       const closeBtn = document.getElementById('closeRightPanelBtn');
       if (closeBtn) {
         closeBtn.title = 'Cerrar panel';
-        const closeIcon = closeBtn.querySelector('i');
-        if (closeIcon) { closeIcon.setAttribute('data-lucide', 'x'); lucide.createIcons(); }
+        closeBtn.innerHTML = '<i data-lucide="x"></i>';
+        lucide.createIcons();
       }
     }
     document.getElementById('fullscreenPanelBtn')?.addEventListener('click', () => {
