@@ -276,7 +276,6 @@
     .main-content.has-results {
       grid-template-columns: 35fr 65fr;
       max-width: 1400px;
-      align-items: stretch;
     }
 
     /* Panel izquierdo limpio */
@@ -1410,6 +1409,8 @@
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow-sm);
       overflow-y: auto;
+      height: calc(100vh - 140px); /* Altura fija igual a left-panel */
+      min-height: 500px; /* Altura mínima igual a left-panel */
       position: relative;
       z-index: 2;
       opacity: 0;
@@ -1421,11 +1422,6 @@
       display: block;
       opacity: 1;
       transform: translateX(0);
-      max-height: calc(100vh - 140px);
-    }
-
-    .main-content.has-results .left-panel {
-      height: auto;
     }
 
     .output-container {
