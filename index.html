@@ -579,6 +579,12 @@
       position: relative;
     }
 
+    .instruction-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
     .header-buttons {
       display: flex;
       align-items: center;
@@ -2801,9 +2807,43 @@
           <div class="input-group">
             <div class="instruction-header" style="display: flex; align-items: center; justify-content: space-between;">
               <label class="input-label" for="instruction">¿Qué email quieres enviar?</label>
-              <button id="historyBtn" class="btn-history-access" type="button" title="Ver historial">
-                <i data-lucide="history"></i>
-              </button>
+              <div class="instruction-header-actions">
+                <div class="config-control-wrapper">
+                  <button id="regionBtn" class="config-control-btn" type="button" aria-haspopup="true" aria-expanded="false">
+                    <span id="regionLabel">Internacional</span>
+                    <i data-lucide="chevron-down"></i>
+                  </button>
+                  <div id="regionDropdown" class="config-dropdown" hidden>
+                    <button type="button" class="config-dropdown-option selected" data-value="">
+                      <span>Internacional</span>
+                      <i data-lucide="check"></i>
+                    </button>
+                    <button type="button" class="config-dropdown-option" data-value="españa">
+                      <span>España</span>
+                      <i data-lucide="check"></i>
+                    </button>
+                    <button type="button" class="config-dropdown-option" data-value="méxico">
+                      <span>México</span>
+                      <i data-lucide="check"></i>
+                    </button>
+                    <button type="button" class="config-dropdown-option" data-value="argentina">
+                      <span>Argentina</span>
+                      <i data-lucide="check"></i>
+                    </button>
+                    <button type="button" class="config-dropdown-option" data-value="chile">
+                      <span>Chile</span>
+                      <i data-lucide="check"></i>
+                    </button>
+                    <button type="button" class="config-dropdown-option" data-value="colombia">
+                      <span>Colombia</span>
+                      <i data-lucide="check"></i>
+                    </button>
+                  </div>
+                </div>
+                <button id="historyBtn" class="btn-history-access" type="button" title="Ver historial">
+                  <i data-lucide="history"></i>
+                </button>
+              </div>
             </div>
 
             <!-- Configuration Controls Row -->
@@ -2830,45 +2870,11 @@
                 </div>
               </div>
 
-              <!-- Región Control -->
-              <div class="config-control-wrapper">
-                <button id="regionBtn" class="config-control-btn" type="button" aria-haspopup="true" aria-expanded="false">
-                  <span id="regionLabel">Internacional</span>
-                  <i data-lucide="chevron-down"></i>
-                </button>
-                <div id="regionDropdown" class="config-dropdown" hidden>
-                  <button type="button" class="config-dropdown-option selected" data-value="">
-                    <span>Internacional</span>
-                    <i data-lucide="check"></i>
-                  </button>
-                  <button type="button" class="config-dropdown-option" data-value="españa">
-                    <span>España</span>
-                    <i data-lucide="check"></i>
-                  </button>
-                  <button type="button" class="config-dropdown-option" data-value="méxico">
-                    <span>México</span>
-                    <i data-lucide="check"></i>
-                  </button>
-                  <button type="button" class="config-dropdown-option" data-value="argentina">
-                    <span>Argentina</span>
-                    <i data-lucide="check"></i>
-                  </button>
-                  <button type="button" class="config-dropdown-option" data-value="chile">
-                    <span>Chile</span>
-                    <i data-lucide="check"></i>
-                  </button>
-                  <button type="button" class="config-dropdown-option" data-value="colombia">
-                    <span>Colombia</span>
-                    <i data-lucide="check"></i>
-                  </button>
-                </div>
-              </div>
-
               <!-- Plantilla Button -->
               <div class="config-control-wrapper">
                 <button id="templatesBtn" class="config-control-btn templates-btn" type="button" aria-haspopup="true" aria-expanded="false">
                   <i data-lucide="folder"></i>
-                  <span>Plantilla</span>
+                  <span>Plantillas</span>
                 </button>
                 <div class="custom-select-menu" id="templatesMenu" role="menu" hidden></div>
               </div>
@@ -3633,9 +3639,9 @@
       const overlay = document.createElement('div');
       overlay.className = 'template-modal-overlay';
       overlay.innerHTML = `
-        <div class="template-modal" role="dialog" aria-modal="true" aria-label="Gestionar planillas">
+        <div class="template-modal" role="dialog" aria-modal="true" aria-label="Gestionar plantillas">
           <div class="template-modal-header">
-            <strong>Gestionar planillas</strong>
+            <strong>Gestionar plantillas</strong>
             <button class="icon-btn" type="button" data-action="close-manager">Cerrar</button>
           </div>
           <div class="template-list" id="templateManagerList"></div>
@@ -3733,7 +3739,7 @@
       if (!container) return;
       const templates = loadTemplates();
       if (!templates.length) {
-        container.innerHTML = '<div class="output-empty">No hay planillas guardadas.</div>';
+        container.innerHTML = '<div class="output-empty">No hay plantillas guardadas.</div>';
         return;
       }
 
@@ -3807,7 +3813,7 @@
       const manage = document.createElement('button');
       manage.className = 'template-manage-btn';
       manage.type = 'button';
-      manage.textContent = 'Gestionar planillas…';
+      manage.textContent = 'Gestionar plantillas…';
       manage.onclick = () => {
         closeTemplatesMenu();
         openManagerModal();
