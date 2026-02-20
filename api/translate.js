@@ -8,18 +8,22 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Método no permitido" });
   }
 
+  let stage = "init";
+
   try {
+    stage = "parsing_request";
     const { subject, body, language } = req.body || {};
     const safeSubject = typeof subject === "string" ? subject.trim() : "";
     const safeBody = typeof body === "string" ? body.trim() : "";
     const safeLanguage = typeof language === "string" ? language.trim() : "";
 
     if (!safeSubject || !safeBody) {
-      return res.status(400).json({ error: "Solicitud inválida" });
+      return res.status(400).json({ error: "Solicitud inválida", stage, safeSubject: safeSubject.substring(0, 50), safeBodyLen: safeBody.length });
     }
 
     const targetLanguage = safeLanguage || "English";
 
+    stage = "calling_openai";
     const systemPrompt = "Eres un traductor profesional de emails. Responde usando el formato exacto indicado, sin explicaciones.";
 
     const userPrompt = `Traduce al ${targetLanguage}. Mantén el formato, saltos de línea y emojis.
@@ -54,11 +58,13 @@ ${safeBody}`;
       }),
     });
 
+    stage = "checking_openai_response";
     if (!upstreamResponse.ok) {
       const errorText = await upstreamResponse.text();
-      throw new Error(`OpenAI request failed (${upstreamResponse.status}): ${errorText}`);
+      return res.status(502).json({ error: "OpenAI failed", stage, status: upstreamResponse.status, details: errorText.substring(0, 300) });
     }
 
+    stage = "parsing_openai_json";
     const data = await upstreamResponse.json();
     const rawContent = data?.choices?.[0]?.message?.content;
 
@@ -73,10 +79,10 @@ ${safeBody}`;
           : "";
 
     if (!output) {
-      throw new Error("Empty translation from OpenAI");
+      return res.status(500).json({ error: "Empty GPT output", stage, rawContentType: typeof rawContent });
     }
 
-    // Parse with delimiters — no JSON, no breakage from newlines
+    stage = "parsing_delimiters";
     const subjectMatch = output.match(/===SUBJECT===\s*([\s\S]*?)\s*===BODY===/);
     const bodyMatch = output.match(/===BODY===\s*([\s\S]*?)\s*===END===/);
 
@@ -84,8 +90,13 @@ ${safeBody}`;
     const translatedBody = bodyMatch ? bodyMatch[1].trim() : "";
 
     if (!translatedSubject || !translatedBody) {
-      console.error("Delimiter parse failed. Raw output:", output);
-      throw new Error("Could not parse translation delimiters");
+      return res.status(500).json({ 
+        error: "Delimiter parse failed", 
+        stage,
+        hasSubject: !!subjectMatch,
+        hasBody: !!bodyMatch,
+        rawOutput: output.substring(0, 500)
+      });
     }
 
     return res.status(200).json({
@@ -98,6 +109,7 @@ ${safeBody}`;
 
     return res.status(500).json({
       error: "Translation failed",
+      stage,
       details,
     });
   }
