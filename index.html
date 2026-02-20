@@ -2008,12 +2008,19 @@
     }
 
     .version-card {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.06);
       border-radius: 12px;
       padding: 1.5rem;
       transition: all 0.15s ease;
       position: relative;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    html.dark .version-card {
+      background: var(--bg-primary);
+      border-color: var(--border-color);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .card-fullscreen-btn {
@@ -2073,7 +2080,7 @@
       display: flex;
       flex-direction: column;
       box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
-      overflow: hidden;
+      overflow: visible;
       transform: scale(0.95);
       transition: transform 0.25s ease;
     }
@@ -2136,6 +2143,14 @@
       padding: 12px 24px;
       border-top: 1px solid var(--border-color);
       flex-shrink: 0;
+      overflow: visible;
+    }
+    .card-modal-footer .version-actions {
+      position: relative;
+    }
+    .card-modal-footer .tone-menu,
+    .card-modal-footer .translate-menu {
+      z-index: 10001;
     }
 
     .version-card:hover {
@@ -5176,34 +5191,58 @@ ${body}`.trim();
       };
       document.addEventListener('keydown', escHandler);
 
-      // Wire up actions inside modal to the original card
-      overlay.querySelectorAll('.expand-btn').forEach(btn => {
-        btn.addEventListener('click', () => { closeCardModal(); card.querySelector('.expand-btn')?.click(); });
-      });
-      overlay.querySelectorAll('.shorten-btn').forEach(btn => {
-        btn.addEventListener('click', () => { closeCardModal(); card.querySelector('.shorten-btn')?.click(); });
-      });
-      overlay.querySelectorAll('.send-gmail-btn').forEach(btn => {
-        btn.addEventListener('click', () => { closeCardModal(); card.querySelector('.send-gmail-btn')?.click(); });
-      });
-      overlay.querySelectorAll('.tone-option').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const tone = btn.dataset.tone;
+      // Wire up actions inside modal
+      overlay.addEventListener('click', async (e) => {
+        // Tone dropdown toggle
+        const toneButton = e.target.closest('.tone-btn');
+        if (toneButton) {
+          const menu = toneButton.parentElement?.querySelector('.tone-menu');
+          if (!menu) return;
+          const shouldOpen = !menu.classList.contains('open');
+          overlay.querySelectorAll('.tone-menu.open').forEach(m => m.classList.remove('open'));
+          overlay.querySelectorAll('.translate-menu.open').forEach(m => m.classList.remove('open'));
+          if (shouldOpen) menu.classList.add('open');
+          return;
+        }
+        // Tone option select
+        const toneOption = e.target.closest('.tone-option');
+        if (toneOption) {
+          const tone = toneOption.dataset.tone;
+          overlay.querySelectorAll('.tone-menu.open').forEach(m => m.classList.remove('open'));
           closeCardModal();
           const origBtn = [...card.querySelectorAll('.tone-option')].find(b => b.dataset.tone === tone);
           origBtn?.click();
-        });
-      });
-      overlay.querySelectorAll('.translate-option').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const lang = btn.dataset.lang;
+          return;
+        }
+        // Translate dropdown toggle
+        const translateButton = e.target.closest('.translate-btn');
+        if (translateButton) {
+          const menu = translateButton.parentElement?.querySelector('.translate-menu');
+          if (!menu) return;
+          const shouldOpen = !menu.classList.contains('open');
+          overlay.querySelectorAll('.translate-menu.open').forEach(m => m.classList.remove('open'));
+          overlay.querySelectorAll('.tone-menu.open').forEach(m => m.classList.remove('open'));
+          if (shouldOpen) menu.classList.add('open');
+          return;
+        }
+        // Translate option select
+        const translateOption = e.target.closest('.translate-option');
+        if (translateOption) {
+          const lang = translateOption.dataset.lang;
+          overlay.querySelectorAll('.translate-menu.open').forEach(m => m.classList.remove('open'));
           closeCardModal();
           const origBtn = [...card.querySelectorAll('.translate-option')].find(b => b.dataset.lang === lang);
           origBtn?.click();
-        });
-      });
-      overlay.querySelectorAll('.restore-original-btn').forEach(btn => {
-        btn.addEventListener('click', () => { closeCardModal(); card.querySelector('.restore-original-btn')?.click(); });
+          return;
+        }
+        // Expand
+        if (e.target.closest('.expand-btn')) { closeCardModal(); card.querySelector('.expand-btn')?.click(); return; }
+        // Shorten
+        if (e.target.closest('.shorten-btn')) { closeCardModal(); card.querySelector('.shorten-btn')?.click(); return; }
+        // Gmail
+        if (e.target.closest('.send-gmail-btn')) { closeCardModal(); card.querySelector('.send-gmail-btn')?.click(); return; }
+        // Restore
+        if (e.target.closest('.restore-original-btn')) { closeCardModal(); card.querySelector('.restore-original-btn')?.click(); return; }
       });
     }
 
