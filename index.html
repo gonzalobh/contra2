@@ -5193,6 +5193,9 @@ ${body}`.trim();
 
       // Wire up actions inside modal
       overlay.addEventListener('click', async (e) => {
+        const modalSubjectEl = overlay.querySelector('[data-role="modal-subject"]');
+        const modalBodyEl = overlay.querySelector('[data-role="modal-body"]');
+
         // Tone dropdown toggle
         const toneButton = e.target.closest('.tone-btn');
         if (toneButton) {
@@ -5204,14 +5207,37 @@ ${body}`.trim();
           if (shouldOpen) menu.classList.add('open');
           return;
         }
-        // Tone option select
+        // Tone option select — do API call in-place
         const toneOption = e.target.closest('.tone-option');
         if (toneOption) {
           const tone = toneOption.dataset.tone;
           overlay.querySelectorAll('.tone-menu.open').forEach(m => m.classList.remove('open'));
-          closeCardModal();
-          const origBtn = [...card.querySelectorAll('.tone-option')].find(b => b.dataset.tone === tone);
-          origBtn?.click();
+          const trigger = overlay.querySelector('.tone-btn');
+          if (trigger && modalBodyEl) {
+            const originalText = modalBodyEl.innerText;
+            trigger.classList.add('retoning');
+            trigger.disabled = true;
+            modalBodyEl.style.opacity = 0.5;
+            try {
+              const res = await fetch('/api/improve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: originalText, mode: tone })
+              });
+              const data = await res.json().catch(() => null);
+              if (res.ok && typeof data?.improvedText === 'string') {
+                modalBodyEl.innerText = data.improvedText.trim();
+                // Sync to original card
+                if (bodyEl) bodyEl.innerText = data.improvedText.trim();
+              }
+            } catch (err) {
+              console.error('Retone error:', err);
+            } finally {
+              modalBodyEl.style.opacity = 1;
+              trigger.classList.remove('retoning');
+              trigger.disabled = false;
+            }
+          }
           return;
         }
         // Translate dropdown toggle
@@ -5225,24 +5251,113 @@ ${body}`.trim();
           if (shouldOpen) menu.classList.add('open');
           return;
         }
-        // Translate option select
+        // Translate option select — do API call in-place
         const translateOption = e.target.closest('.translate-option');
         if (translateOption) {
           const lang = translateOption.dataset.lang;
           overlay.querySelectorAll('.translate-menu.open').forEach(m => m.classList.remove('open'));
-          closeCardModal();
-          const origBtn = [...card.querySelectorAll('.translate-option')].find(b => b.dataset.lang === lang);
-          origBtn?.click();
+          const trigger = overlay.querySelector('.translate-btn');
+          if (trigger && modalSubjectEl && modalBodyEl) {
+            const subjectText = modalSubjectEl.textContent.trim();
+            const bodyText = modalBodyEl.textContent.trim();
+            if (!subjectText || !bodyText) return;
+            trigger.disabled = true;
+            trigger.classList.add('translating');
+            modalSubjectEl.style.opacity = 0.5;
+            modalBodyEl.style.opacity = 0.5;
+            try {
+              const res = await fetch('/api/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subject: subjectText, body: bodyText, language: lang })
+              });
+              const data = await res.json().catch(() => null);
+              if (res.ok && data?.translatedSubject && data?.translatedBody) {
+                modalSubjectEl.textContent = data.translatedSubject.trim();
+                modalBodyEl.textContent = data.translatedBody.trim();
+                // Sync to original card
+                if (subjectEl) subjectEl.textContent = data.translatedSubject.trim();
+                if (bodyEl) bodyEl.textContent = data.translatedBody.trim();
+              }
+            } catch (err) {
+              console.error('Translate error:', err);
+            } finally {
+              modalSubjectEl.style.opacity = 1;
+              modalBodyEl.style.opacity = 1;
+              trigger.classList.remove('translating');
+              trigger.disabled = false;
+            }
+          }
           return;
         }
-        // Expand
-        if (e.target.closest('.expand-btn')) { closeCardModal(); card.querySelector('.expand-btn')?.click(); return; }
-        // Shorten
-        if (e.target.closest('.shorten-btn')) { closeCardModal(); card.querySelector('.shorten-btn')?.click(); return; }
-        // Gmail
-        if (e.target.closest('.send-gmail-btn')) { closeCardModal(); card.querySelector('.send-gmail-btn')?.click(); return; }
+        // Expand — do API call in-place
+        if (e.target.closest('.expand-btn')) {
+          const btn = overlay.querySelector('.expand-btn');
+          if (btn && modalBodyEl) {
+            const originalText = modalBodyEl.innerText;
+            btn.disabled = true;
+            modalBodyEl.style.opacity = 0.5;
+            try {
+              const res = await fetch('/api/improve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: originalText, mode: 'expand' })
+              });
+              const data = await res.json().catch(() => null);
+              if (res.ok && typeof data?.improvedText === 'string') {
+                modalBodyEl.innerText = data.improvedText.trim();
+                if (bodyEl) bodyEl.innerText = data.improvedText.trim();
+              }
+            } catch (err) {
+              console.error('Expand error:', err);
+            } finally {
+              modalBodyEl.style.opacity = 1;
+              btn.disabled = false;
+            }
+          }
+          return;
+        }
+        // Shorten — do API call in-place
+        if (e.target.closest('.shorten-btn')) {
+          const btn = overlay.querySelector('.shorten-btn');
+          if (btn && modalBodyEl) {
+            const originalText = modalBodyEl.innerText;
+            btn.disabled = true;
+            modalBodyEl.style.opacity = 0.5;
+            try {
+              const res = await fetch('/api/improve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: originalText, mode: 'simplify' })
+              });
+              const data = await res.json().catch(() => null);
+              if (res.ok && typeof data?.improvedText === 'string') {
+                modalBodyEl.innerText = data.improvedText.trim();
+                if (bodyEl) bodyEl.innerText = data.improvedText.trim();
+              }
+            } catch (err) {
+              console.error('Shorten error:', err);
+            } finally {
+              modalBodyEl.style.opacity = 1;
+              btn.disabled = false;
+            }
+          }
+          return;
+        }
+        // Gmail — sync content first, then delegate to original card
+        if (e.target.closest('.send-gmail-btn')) {
+          if (modalSubjectEl && subjectEl) subjectEl.innerHTML = modalSubjectEl.innerHTML;
+          if (modalBodyEl && bodyEl) bodyEl.innerHTML = modalBodyEl.innerHTML;
+          closeCardModal();
+          card.querySelector('.send-gmail-btn')?.click();
+          return;
+        }
         // Restore
-        if (e.target.closest('.restore-original-btn')) { closeCardModal(); card.querySelector('.restore-original-btn')?.click(); return; }
+        if (e.target.closest('.restore-original-btn')) {
+          closeCardModal();
+          card.querySelector('.restore-original-btn')?.click();
+          return;
+        }
       });
     }
 
