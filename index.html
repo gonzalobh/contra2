@@ -3036,20 +3036,34 @@
               <!-- Formalidad Control -->
               <div class="config-control-wrapper">
                 <button id="formalidadBtn" class="config-control-btn" type="button" aria-haspopup="true" aria-expanded="false">
-                  <span id="formalidadLabel">Formal (Usted)</span>
+                  <span id="formalidadLabel">Formal</span>
                   <i data-lucide="chevron-down"></i>
                 </button>
                 <div id="formalidadDropdown" class="config-dropdown" hidden>
                   <button type="button" class="config-dropdown-option selected" data-value="usted">
-                    <span>Formal (Usted)</span>
+                    <span>Formal</span>
                     <i data-lucide="check"></i>
                   </button>
                   <button type="button" class="config-dropdown-option" data-value="tu">
-                    <span>Informal (Tú)</span>
+                    <span>Informal</span>
                     <i data-lucide="check"></i>
                   </button>
-                  <button type="button" class="config-dropdown-option" data-value="auto">
-                    <span>Auto</span>
+                </div>
+              </div>
+
+              <!-- Contexto Control -->
+              <div class="config-control-wrapper">
+                <button id="contextoBtn" class="config-control-btn" type="button" aria-haspopup="true" aria-expanded="false">
+                  <span id="contextoLabel">Profesional</span>
+                  <i data-lucide="chevron-down"></i>
+                </button>
+                <div id="contextoDropdown" class="config-dropdown" hidden>
+                  <button type="button" class="config-dropdown-option selected" data-value="profesional">
+                    <span>Profesional</span>
+                    <i data-lucide="check"></i>
+                  </button>
+                  <button type="button" class="config-dropdown-option" data-value="personal">
+                    <span>Personal</span>
                     <i data-lucide="check"></i>
                   </button>
                 </div>
@@ -3146,6 +3160,8 @@
     const originalEmailGroupEl = document.getElementById('originalEmailGroup');
     const formalidadBtn = document.getElementById('formalidadBtn');
     const formalidadDropdown = document.getElementById('formalidadDropdown');
+    const contextoBtn = document.getElementById('contextoBtn');
+    const contextoDropdown = document.getElementById('contextoDropdown');
     const regionBtn = document.getElementById('regionBtn');
     const regionDropdown = document.getElementById('regionDropdown');
     const outputEl = document.getElementById('output');
@@ -3260,6 +3276,7 @@
     const SELECTION_MIN_LENGTH = 3;
     const STORAGE_KEY = 'formalidadPreference';
     const REGION_KEY = 'regionPreference';
+    const CONTEXTO_KEY = 'contextoPreference';
     const PROFILE_KEY = 'userProfile';
 
     let currentMode = 'compose';
@@ -3280,11 +3297,15 @@
     let formalidadValue = localStorage.getItem(STORAGE_KEY) || 'usted';
     let tonoValue = 'neutro';
     let regionValue = localStorage.getItem(REGION_KEY) || '';
-    if (!['auto', 'tu', 'usted'].includes(formalidadValue)) {
+    let contextoValue = localStorage.getItem(CONTEXTO_KEY) || 'profesional';
+    if (!['tu', 'usted'].includes(formalidadValue)) {
       formalidadValue = 'usted';
     }
     if (!['', 'españa', 'méxico', 'argentina', 'chile', 'colombia'].includes(regionValue)) {
       regionValue = '';
+    }
+    if (!['profesional', 'personal'].includes(contextoValue)) {
+      contextoValue = 'profesional';
     }
 
 
@@ -3318,9 +3339,8 @@
     const formalidadOptions = formalidadDropdown?.querySelectorAll('.config-dropdown-option') || [];
 
     const formalidadLabels = {
-      auto: 'Auto',
-      tu: 'Informal (Tú)',
-      usted: 'Formal (Usted)'
+      tu: 'Informal',
+      usted: 'Formal'
     };
 
     localStorage.setItem(STORAGE_KEY, formalidadValue);
@@ -3341,16 +3361,26 @@
 
     updateFormalidadChecks();
 
+    function closeAllConfigDropdowns(except) {
+      const pairs = [
+        [formalidadBtn, formalidadDropdown],
+        [contextoBtn, contextoDropdown],
+        [regionBtn, regionDropdown]
+      ];
+      pairs.forEach(([btn, dd]) => {
+        if (btn && dd && btn !== except) {
+          btn.setAttribute('aria-expanded', 'false');
+          dd.hidden = true;
+        }
+      });
+    }
+
     formalidadBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
       const isExpanded = formalidadBtn.getAttribute('aria-expanded') === 'true';
+      closeAllConfigDropdowns(formalidadBtn);
       formalidadBtn.setAttribute('aria-expanded', !isExpanded);
       formalidadDropdown.hidden = isExpanded;
-      // Close other dropdowns if open
-      if (regionBtn && regionDropdown) {
-        regionBtn.setAttribute('aria-expanded', 'false');
-        regionDropdown.hidden = true;
-      }
     });
 
     formalidadOptions.forEach((btn) => {
@@ -3365,6 +3395,56 @@
         updateFormalidadChecks();
         formalidadDropdown.hidden = true;
         formalidadBtn.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    // Contexto control
+    const contextoLabel = document.getElementById('contextoLabel');
+    const contextoOptions = contextoDropdown?.querySelectorAll('.config-dropdown-option') || [];
+
+    const contextoLabels = {
+      profesional: 'Profesional',
+      personal: 'Personal'
+    };
+
+    localStorage.setItem(CONTEXTO_KEY, contextoValue);
+
+    if (contextoLabel) {
+      contextoLabel.textContent = contextoLabels[contextoValue] || contextoLabels.profesional;
+    }
+
+    function updateContextoChecks() {
+      contextoOptions.forEach((btn) => {
+        if (btn.dataset.value === contextoValue) {
+          btn.classList.add('selected');
+        } else {
+          btn.classList.remove('selected');
+        }
+      });
+    }
+
+    updateContextoChecks();
+
+    contextoBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isExpanded = contextoBtn.getAttribute('aria-expanded') === 'true';
+      closeAllConfigDropdowns(contextoBtn);
+      contextoBtn.setAttribute('aria-expanded', !isExpanded);
+      contextoDropdown.hidden = isExpanded;
+    });
+
+    contextoOptions.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        contextoValue = btn.dataset.value || 'profesional';
+        localStorage.setItem(CONTEXTO_KEY, contextoValue);
+
+        if (contextoLabel) {
+          contextoLabel.textContent = contextoLabels[contextoValue] || contextoLabels.profesional;
+        }
+
+        updateContextoChecks();
+        contextoDropdown.hidden = true;
+        contextoBtn.setAttribute('aria-expanded', 'false');
       });
     });
 
@@ -3402,13 +3482,9 @@
     regionBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
       const isExpanded = regionBtn.getAttribute('aria-expanded') === 'true';
+      closeAllConfigDropdowns(regionBtn);
       regionBtn.setAttribute('aria-expanded', !isExpanded);
       regionDropdown.hidden = isExpanded;
-      // Close other dropdowns if open
-      if (formalidadBtn && formalidadDropdown) {
-        formalidadBtn.setAttribute('aria-expanded', 'false');
-        formalidadDropdown.hidden = true;
-      }
     });
 
     regionOptions.forEach((btn) => {
@@ -3432,6 +3508,12 @@
         if (!formalidadBtn.contains(e.target) && !formalidadDropdown.contains(e.target)) {
           formalidadDropdown.hidden = true;
           formalidadBtn.setAttribute('aria-expanded', 'false');
+        }
+      }
+      if (contextoBtn && contextoDropdown) {
+        if (!contextoBtn.contains(e.target) && !contextoDropdown.contains(e.target)) {
+          contextoDropdown.hidden = true;
+          contextoBtn.setAttribute('aria-expanded', 'false');
         }
       }
       if (regionBtn && regionDropdown) {
@@ -3845,6 +3927,7 @@
       return {
         instruction: document.getElementById('instruction').value,
         formalidad: formalidadValue,
+        contexto: contextoValue,
         tone: tonoValue,
         recipientRegion: regionValue,
         mode: document.querySelector('.mode-toggle-btn.active')?.dataset.mode || 'compose'
@@ -3876,6 +3959,15 @@
         formalidadLabel.textContent = formalidadLabels[formalidadValue] || formalidadLabels.usted;
       }
       updateFormalidadChecks();
+
+      // Apply contexto
+      const templateContexto = data.contexto || 'profesional';
+      contextoValue = ['profesional', 'personal'].includes(templateContexto) ? templateContexto : 'profesional';
+      localStorage.setItem(CONTEXTO_KEY, contextoValue);
+      if (contextoLabel) {
+        contextoLabel.textContent = contextoLabels[contextoValue] || contextoLabels.profesional;
+      }
+      updateContextoChecks();
       
       // Apply region
       const templateRegion = data.recipientRegion || '';
@@ -5536,6 +5628,7 @@ ${body}`.trim();
             senderRole,
             recipientRole,
             formalidad: formality,
+            contexto: contextoValue,
             tone,
             versions
           })

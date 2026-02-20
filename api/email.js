@@ -20,6 +20,7 @@ export default async function handler(req, res) {
       recipientRole,
       formality,
       formalidad,
+      contexto,
       versions,
     } = req.body || {};
 
@@ -37,6 +38,8 @@ export default async function handler(req, res) {
       ? incomingFormalidad.trim().toLowerCase()
       : (typeof incomingFormalidad?.preference === "string" ? incomingFormalidad.preference.trim().toLowerCase() : "auto");
     const safeFormalityPreference = ["auto", "tu", "usted"].includes(rawFormalityPreference) ? rawFormalityPreference : "auto";
+    const rawContexto = typeof contexto === "string" ? contexto.trim().toLowerCase() : "profesional";
+    const safeContexto = ["profesional", "personal"].includes(rawContexto) ? rawContexto : "profesional";
 
     const regionMap = {
       españa: "Spain",
@@ -55,25 +58,27 @@ export default async function handler(req, res) {
     }
 
     const systemPrompt = `
-Eres un especialista en redacción de emails profesionales adaptados culturalmente.
+Eres un especialista en redacción de emails adaptados culturalmente.
 
 NO escribes en español neutro.
 SIEMPRE localizas el idioma según la región indicada.
 
-Tu objetivo es que el email parezca escrito por un profesional local,
+Tu objetivo es que el email parezca escrito por una persona real,
 no por un sistema traducido.
 
 REGLAS CRÍTICAS:
 - Nunca uses español internacional genérico.
 - El saludo, tono, vocabulario y cierre deben adaptarse al país.
 - Evita fórmulas universales.
-- Prioriza naturalidad empresarial local.
+- Prioriza naturalidad local.
 - No sobre-explicar.
 - No sonar robótico.
 - No usar estructuras latinoamericanas si la región es España.
 - No usar estructuras peninsulares si la región es LATAM.
+- Adapta el registro al CONTEXTO indicado (profesional o personal).
 
-El estilo debe coincidir con cómo realmente escriben ejecutivos en ese país.
+El estilo debe coincidir con cómo realmente escriben personas en ese país
+en el contexto indicado.
 
 Responde SIEMPRE en JSON válido:
 
@@ -214,53 +219,42 @@ Keep structure clean and practical.
 Sender Role: ${safeSenderRole || "Not specified"}
 Recipient Role: ${safeRecipientRole || "Not specified"}
 
-### FORMALITY DECISION MODE
+### CONTEXT MODE
+Email Context: ${safeContexto === "personal" ? "PERSONAL" : "PROFESIONAL"}
+
+${safeContexto === "personal" ? `
+This is a PERSONAL email. Critical rules:
+- Do NOT use professional/business vocabulary ("Estimado cliente", "Quedamos a la espera", "Quedo atento a sus comentarios")
+- Do NOT use corporate closings ("Saludos cordiales", "Cordialmente", "Atentamente")
+- Use natural, warm greetings appropriate for personal relationships ("Hola", "¡Hola!", "Querido/a", "Buenas")
+- Use casual, natural closings ("¡Un abrazo!", "Un saludo", "¡Nos vemos!", "Cuídate")
+- The tone should feel like writing to a friend, family member, or acquaintance
+- Adapt warmth level to the formality setting (formal personal = respectful but warm, informal personal = casual and friendly)
+- Never assume a business context. Words like "cliente", "empresa", "reunión de negocios", "propuesta" should NOT appear unless the user explicitly mentioned them.
+` : `
+This is a PROFESSIONAL/BUSINESS email. Rules:
+- Use appropriate business vocabulary and conventions
+- Use professional greetings and closings typical of the region
+- Maintain workplace-appropriate tone throughout
+- Adapt formality level to the setting (formal = executive/client level, informal = colleague/team level)
+`}
+
+### FORMALITY DECISION
 
 User Preference: ${safeFormalityPreference}
 
-Context Signals You May Use:
-
-* Sender Role: ${safeSenderRole || "Unknown"}
-* Recipient Role: ${safeRecipientRole || "Unknown"}
-* Email Type: ${safeMode}
-* Region: ${safeRecipientRegion}
-* Original Email (if reply): may contain tone indicators.
-
-If User Preference = "tu" → MUST use TÚ.
-If User Preference = "usted" → MUST use USTED.
+If User Preference = "tu" → MUST use TÚ/TE/TU throughout.
+If User Preference = "usted" → MUST use USTED/LE/SU throughout.
 
 If User Preference = "auto" →
-You must determine the appropriate level of formality.
-
-### HOW TO CHOOSE FORMALITY (AUTO MODE)
-
-Decide como lo haría un profesional real:
-
-Use USTED when:
-
-* There is hierarchy (client, executive, unknown contact)
-* First interaction
-* B2B communication
-* Roles sound senior
-* Region expects professional distance (Spain, corporate LATAM)
-
-Use TÚ when:
-
-* Internal team communication
-* Peer-to-peer collaboration
-* Casual but still professional context
-* The instruction clearly suggests closeness
-
-If unsure → prefer USTED.
+Decide based on context: personal emails default to TÚ, professional emails default to USTED.
 
 CRITICAL:
-Never mix tú and usted.
+Never mix tú and usted in the same email.
 The reader must not notice this decision was made artificially.
 
-- Usa los cargos para ajustar enfoque, jerarquía y nivel de detalle.
-- No menciones los cargos explícitamente salvo que suene natural.
-- Si User Preference = "usted": usa USTED/LE/SU con tono profesional formal.
-- Si User Preference = "tu": usa TÚ/TE/TU con tono cercano-profesional.
+- Si User Preference = "usted": usa USTED/LE/SU.
+- Si User Preference = "tu": usa TÚ/TE/TU.
 - Regla crítica: NO mezclar tuteo y ustedeo en el mismo email.
 - Si es reply, intenta respetar la formalidad percibida del correo original, salvo que el usuario fuerce otra opción.
 `;
@@ -276,14 +270,20 @@ Sender Name: ${safeSenderName || "[Nombre]"}
 Recipient Name: ${safeClientName || ""}
 `;
 
+    const versionDescriptions = safeContexto === "personal"
+      ? `Versión 1: Más directa y natural.
+Versión 2: Más cálida y expresiva.
+Versión 3: Más elaborada y detallada.`
+      : `Versión 1: Más directa y ejecutiva.
+Versión 2: Más diplomática y empática.
+Versión 3: Más formal y estructurada.`;
+
     const finalUserPrompt = `${safeMode === "reply" ? `${modePrompt}\n\n` : ""}${userPrompt}
 
 Genera ${safeVersions} versiones claramente diferentes entre sí.
 Cada versión debe tener un enfoque distinto.
 
-Versión 1: Más directa y ejecutiva.
-Versión 2: Más diplomática y empática.
-Versión 3: Más formal y estructurada.
+${versionDescriptions}
 
 No repitas frases.
 No uses estructuras similares.
