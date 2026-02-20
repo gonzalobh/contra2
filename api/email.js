@@ -272,7 +272,7 @@ ${rolesAndFormalityPrompt}
 ### EMAIL REQUEST
 Instruction: ${safeInstruction}
 
-Sender Name: ${safeSenderName || "El equipo"}
+Sender Name: ${safeSenderName || "[Nombre]"}
 Recipient Name: ${safeClientName || ""}
 `;
 

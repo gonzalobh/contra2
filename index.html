@@ -2013,6 +2013,129 @@
       border-radius: 12px;
       padding: 1.5rem;
       transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .card-fullscreen-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      opacity: 0;
+    }
+    .version-card:hover .card-fullscreen-btn {
+      opacity: 1;
+    }
+    .card-fullscreen-btn:hover {
+      background: var(--hover-bg);
+      color: var(--text-primary);
+    }
+    .card-fullscreen-btn svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    /* Card fullscreen modal */
+    .card-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .card-modal-overlay.active {
+      opacity: 1;
+    }
+    .card-modal {
+      background: var(--bg-primary);
+      border-radius: 16px;
+      width: calc(100% - 80px);
+      max-width: 800px;
+      height: calc(100vh - 80px);
+      max-height: 700px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      transform: scale(0.95);
+      transition: transform 0.25s ease;
+    }
+    .card-modal-overlay.active .card-modal {
+      transform: scale(1);
+    }
+    .card-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-color);
+      flex-shrink: 0;
+    }
+    .card-modal-header h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    .card-modal-close {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .card-modal-close:hover {
+      background: var(--hover-bg);
+      color: var(--text-primary);
+    }
+    .card-modal-close svg {
+      width: 18px;
+      height: 18px;
+    }
+    .card-modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+    .card-modal-body .version-section {
+      margin-bottom: 1.125rem;
+    }
+    .card-modal-body .version-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 0.375rem;
+    }
+    .card-modal-body .version-content {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+    .card-modal-footer {
+      padding: 12px 24px;
+      border-top: 1px solid var(--border-color);
+      flex-shrink: 0;
     }
 
     .version-card:hover {
@@ -4916,6 +5039,9 @@ ${body}`.trim();
         const card = document.createElement('article');
         card.className = 'version-card fade-in';
         card.innerHTML = `
+          <button class="card-fullscreen-btn" type="button" title="Pantalla completa">
+            <i data-lucide="maximize-2"></i>
+          </button>
           <span class="version-label">Versión ${index + 1}</span>
           <div class="version-section">
             <div class="version-title">Asunto</div>
@@ -4992,6 +5118,103 @@ ${body}`.trim();
       }
 
     }
+
+    // Card fullscreen modal
+    function openCardModal(card) {
+      const versionLabel = card.querySelector('.version-label')?.textContent || 'Email';
+      const subjectEl = card.querySelector('[data-role="email-subject"]');
+      const bodyEl = card.querySelector('[data-role="email-body"]');
+      const actionsEl = card.querySelector('.version-actions');
+
+      const overlay = document.createElement('div');
+      overlay.className = 'card-modal-overlay';
+      overlay.innerHTML = `
+        <div class="card-modal">
+          <div class="card-modal-header">
+            <h3>${escapeHtml(versionLabel)}</h3>
+            <button class="card-modal-close" type="button" title="Cerrar">
+              <i data-lucide="minimize-2"></i>
+            </button>
+          </div>
+          <div class="card-modal-body">
+            <div class="version-section">
+              <div class="version-title">Asunto</div>
+              <div class="version-content" data-role="modal-subject" contenteditable="true">${subjectEl ? subjectEl.innerHTML : ''}</div>
+            </div>
+            <div class="version-section">
+              <div class="version-title">Cuerpo</div>
+              <div class="version-content" data-role="modal-body" contenteditable="true">${bodyEl ? bodyEl.innerHTML : ''}</div>
+            </div>
+          </div>
+          <div class="card-modal-footer">${actionsEl ? actionsEl.outerHTML : ''}</div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      requestAnimationFrame(() => overlay.classList.add('active'));
+      if (window.lucide) window.lucide.createIcons();
+
+      // Sync edits back to original card on close
+      function closeCardModal() {
+        const modalSubject = overlay.querySelector('[data-role="modal-subject"]');
+        const modalBody = overlay.querySelector('[data-role="modal-body"]');
+        if (modalSubject && subjectEl) subjectEl.innerHTML = modalSubject.innerHTML;
+        if (modalBody && bodyEl) bodyEl.innerHTML = modalBody.innerHTML;
+        overlay.classList.remove('active');
+        setTimeout(() => overlay.remove(), 250);
+      }
+
+      overlay.querySelector('.card-modal-close')?.addEventListener('click', closeCardModal);
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeCardModal();
+      });
+      const escHandler = (e) => {
+        if (e.key === 'Escape' && document.body.contains(overlay)) {
+          closeCardModal();
+          document.removeEventListener('keydown', escHandler);
+        }
+      };
+      document.addEventListener('keydown', escHandler);
+
+      // Wire up actions inside modal to the original card
+      overlay.querySelectorAll('.expand-btn').forEach(btn => {
+        btn.addEventListener('click', () => { closeCardModal(); card.querySelector('.expand-btn')?.click(); });
+      });
+      overlay.querySelectorAll('.shorten-btn').forEach(btn => {
+        btn.addEventListener('click', () => { closeCardModal(); card.querySelector('.shorten-btn')?.click(); });
+      });
+      overlay.querySelectorAll('.send-gmail-btn').forEach(btn => {
+        btn.addEventListener('click', () => { closeCardModal(); card.querySelector('.send-gmail-btn')?.click(); });
+      });
+      overlay.querySelectorAll('.tone-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tone = btn.dataset.tone;
+          closeCardModal();
+          const origBtn = [...card.querySelectorAll('.tone-option')].find(b => b.dataset.tone === tone);
+          origBtn?.click();
+        });
+      });
+      overlay.querySelectorAll('.translate-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const lang = btn.dataset.lang;
+          closeCardModal();
+          const origBtn = [...card.querySelectorAll('.translate-option')].find(b => b.dataset.lang === lang);
+          origBtn?.click();
+        });
+      });
+      overlay.querySelectorAll('.restore-original-btn').forEach(btn => {
+        btn.addEventListener('click', () => { closeCardModal(); card.querySelector('.restore-original-btn')?.click(); });
+      });
+    }
+
+    // Event delegation for card fullscreen buttons
+    outputEl.addEventListener('click', (e) => {
+      const fsBtn = e.target.closest('.card-fullscreen-btn');
+      if (fsBtn) {
+        const card = fsBtn.closest('.version-card');
+        if (card) openCardModal(card);
+      }
+    });
 
     async function generateEmailFromAI({ instruction, context, isRewrite }) {
       const mode = instruction.includes('Expande') ? 'expand' : 'simplify';
@@ -5105,7 +5328,7 @@ ${body}`.trim();
       const formality = formalidadValue;
       const tone = tonoValue;
 
-      const senderName = senderInput || 'El equipo';
+      const senderName = senderInput || '[Nombre]';
       const clientName = 'cliente';
       const recipientRole = '';
       const versions = selectedVersions;
