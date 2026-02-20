@@ -4873,6 +4873,7 @@ ${body}`.trim();
 
         const data = await res.json().catch(() => null);
         if (!res.ok || !data?.translatedSubject || !data?.translatedBody) {
+          console.error('Translate API response:', res.status, JSON.stringify(data));
           throw new Error('No se pudo traducir');
         }
 
