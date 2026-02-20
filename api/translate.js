@@ -21,13 +21,13 @@ export default async function handler(req, res) {
     const targetLanguage = safeLanguage || "English";
     const systemPrompt =
       "Eres un traductor profesional de emails. Responde únicamente con JSON válido.";
-    const userPrompt = `Traduce el asunto y el cuerpo al idioma solicitado.\nMantén formato original.\nMantén emojis.\nNo agregues explicaciones.\nDevuelve JSON válido.\n\nIdioma: ${targetLanguage}\n\nAsunto:\n${safeSubject}\n\nCuerpo:\n${safeBody}\n\nFormato de salida obligatorio:\n{\n  \"translatedSubject\": \"...\",\n  \"translatedBody\": \"...\"\n}`;
+    const userPrompt = `Traduce el asunto y el cuerpo al idioma solicitado.\nMantén formato original incluyendo saltos de línea (usa \\n en el JSON para representarlos).\nMantén emojis.\nNo agregues explicaciones.\nDevuelve JSON válido.\n\nIdioma: ${targetLanguage}\n\nAsunto:\n${safeSubject}\n\nCuerpo:\n${safeBody}\n\nFormato de salida obligatorio:\n{\n  \"translatedSubject\": \"...\",\n  \"translatedBody\": \"...\"\n}`;
 
     const upstreamResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.CONTRA}`,
+        Authorization: `Bearer ${process.env.ORTO}`,
       },
       body: JSON.stringify({
         model: "gpt-4o",

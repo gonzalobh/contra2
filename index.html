@@ -4846,8 +4846,8 @@ ${body}`.trim();
       const bodyEl = card.querySelector('[data-role="email-body"]');
       if (!subjectEl || !bodyEl) return;
 
-      const subjectText = subjectEl.textContent.trim();
-      const bodyText = bodyEl.textContent.trim();
+      const subjectText = subjectEl.innerText.trim();
+      const bodyText = bodyEl.innerText.trim();
       if (!subjectText || !bodyText) return;
 
       if (!card.dataset.originalSubject) {
@@ -4878,8 +4878,8 @@ ${body}`.trim();
 
         const translatedSubject = data.translatedSubject.trim();
         const translatedBody = data.translatedBody.trim();
-        subjectEl.textContent = translatedSubject;
-        bodyEl.textContent = translatedBody;
+        subjectEl.innerText = translatedSubject;
+        bodyEl.innerText = translatedBody;
         card.dataset.isTranslated = 'true';
 
         const copyButton = card.querySelector('.version-copy-btn');
@@ -5258,8 +5258,8 @@ ${body}`.trim();
           overlay.querySelectorAll('.translate-menu.open').forEach(m => m.classList.remove('open'));
           const trigger = overlay.querySelector('.translate-btn');
           if (trigger && modalSubjectEl && modalBodyEl) {
-            const subjectText = modalSubjectEl.textContent.trim();
-            const bodyText = modalBodyEl.textContent.trim();
+            const subjectText = modalSubjectEl.innerText.trim();
+            const bodyText = modalBodyEl.innerText.trim();
             if (!subjectText || !bodyText) return;
             trigger.disabled = true;
             trigger.classList.add('translating');
@@ -5273,11 +5273,11 @@ ${body}`.trim();
               });
               const data = await res.json().catch(() => null);
               if (res.ok && data?.translatedSubject && data?.translatedBody) {
-                modalSubjectEl.textContent = data.translatedSubject.trim();
-                modalBodyEl.textContent = data.translatedBody.trim();
+                modalSubjectEl.innerText = data.translatedSubject.trim();
+                modalBodyEl.innerText = data.translatedBody.trim();
                 // Sync to original card
-                if (subjectEl) subjectEl.textContent = data.translatedSubject.trim();
-                if (bodyEl) bodyEl.textContent = data.translatedBody.trim();
+                if (subjectEl) subjectEl.innerText = data.translatedSubject.trim();
+                if (bodyEl) bodyEl.innerText = data.translatedBody.trim();
               }
             } catch (err) {
               console.error('Translate error:', err);
