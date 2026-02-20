@@ -5279,6 +5279,19 @@ ${body}`.trim();
                 // Sync to original card
                 if (subjectEl) subjectEl.innerText = data.translatedSubject.trim();
                 if (bodyEl) bodyEl.innerText = data.translatedBody.trim();
+                // Store originals on the card for restore
+                if (!card.dataset.originalSubject) {
+                  card.dataset.originalSubject = encodeURIComponent(subjectText);
+                }
+                if (!card.dataset.originalBody) {
+                  card.dataset.originalBody = encodeURIComponent(bodyText);
+                }
+                card.dataset.isTranslated = 'true';
+                // Show restore button in modal and original card
+                const modalRestore = overlay.querySelector('.restore-original-btn');
+                if (modalRestore) modalRestore.classList.add('visible');
+                const cardRestore = card.querySelector('.restore-original-btn');
+                if (cardRestore) cardRestore.classList.add('visible');
               }
             } catch (err) {
               console.error('Translate error:', err);
@@ -5353,10 +5366,23 @@ ${body}`.trim();
           card.querySelector('.send-gmail-btn')?.click();
           return;
         }
-        // Restore
+        // Restore — do it in-place in modal
         if (e.target.closest('.restore-original-btn')) {
-          closeCardModal();
-          card.querySelector('.restore-original-btn')?.click();
+          const originalSubject = decodeURIComponent(card.dataset.originalSubject || '').trim();
+          const originalBody = decodeURIComponent(card.dataset.originalBody || '').trim();
+          if (originalSubject && originalBody) {
+            modalSubjectEl.innerText = originalSubject;
+            modalBodyEl.innerText = originalBody;
+            // Sync to original card
+            if (subjectEl) subjectEl.innerText = originalSubject;
+            if (bodyEl) bodyEl.innerText = originalBody;
+            card.dataset.isTranslated = 'false';
+            // Hide restore button in modal and original card
+            const modalRestore = overlay.querySelector('.restore-original-btn');
+            if (modalRestore) modalRestore.classList.remove('visible');
+            const cardRestore = card.querySelector('.restore-original-btn');
+            if (cardRestore) cardRestore.classList.remove('visible');
+          }
           return;
         }
       });
