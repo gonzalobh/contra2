@@ -72,12 +72,31 @@ export default async function handler(req, res) {
     try {
       parsed = JSON.parse(normalizedPayload);
     } catch {
-      const jsonMatch = normalizedPayload.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error("Invalid translation JSON format");
-      }
+      // GPT sometimes returns literal newlines inside JSON string values — fix them
+      try {
+        const fixed = normalizedPayload.replace(
+          /"((?:[^"\\]|\\.)*)"/g,
+          (match, content) => '"' + content.replace(/\n/g, '\\n') + '"'
+        );
+        const jsonMatch = fixed.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsed = JSON.parse(jsonMatch[0]);
+        }
+      } catch { /* fall through */ }
 
-      parsed = JSON.parse(jsonMatch[0]);
+      // Last resort: regex extraction
+      if (!parsed) {
+        const subjectMatch = normalizedPayload.match(/"translatedSubject"\s*:\s*"((?:[^"\\]|\\.|[\n\r])*)"/);
+        const bodyMatch = normalizedPayload.match(/"translatedBody"\s*:\s*"((?:[^"\\]|\\.|[\n\r])*)"/);
+        if (subjectMatch && bodyMatch) {
+          parsed = {
+            translatedSubject: subjectMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"'),
+            translatedBody: bodyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"'),
+          };
+        } else {
+          throw new Error("Invalid translation JSON format");
+        }
+      }
     }
 
     const translatedSubject =
