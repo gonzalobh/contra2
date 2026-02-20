@@ -32,6 +32,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "gpt-4o",
         temperature: 0.2,
+        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
