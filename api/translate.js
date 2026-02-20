@@ -19,9 +19,24 @@ export default async function handler(req, res) {
     }
 
     const targetLanguage = safeLanguage || "English";
-    const systemPrompt =
-      "Eres un traductor profesional de emails. Responde únicamente con JSON válido.";
-    const userPrompt = `Traduce el asunto y el cuerpo al idioma solicitado.\nMantén formato original incluyendo saltos de línea (usa \\n en el JSON para representarlos).\nMantén emojis.\nNo agregues explicaciones.\nDevuelve JSON válido.\n\nIdioma: ${targetLanguage}\n\nAsunto:\n${safeSubject}\n\nCuerpo:\n${safeBody}\n\nFormato de salida obligatorio:\n{\n  \"translatedSubject\": \"...\",\n  \"translatedBody\": \"...\"\n}`;
+
+    const systemPrompt = "Eres un traductor profesional de emails. Responde usando el formato exacto indicado, sin explicaciones.";
+
+    const userPrompt = `Traduce al ${targetLanguage}. Mantén el formato, saltos de línea y emojis.
+
+Responde EXACTAMENTE con este formato (usa los delimitadores tal cual):
+
+===SUBJECT===
+(asunto traducido aquí)
+===BODY===
+(cuerpo traducido aquí)
+===END===
+
+Asunto original:
+${safeSubject}
+
+Cuerpo original:
+${safeBody}`;
 
     const upstreamResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -32,7 +47,6 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "gpt-4o",
         temperature: 0.2,
-        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
@@ -48,7 +62,7 @@ export default async function handler(req, res) {
     const data = await upstreamResponse.json();
     const rawContent = data?.choices?.[0]?.message?.content;
 
-    const translatedPayload =
+    const output =
       typeof rawContent === "string"
         ? rawContent.trim()
         : Array.isArray(rawContent)
@@ -58,55 +72,20 @@ export default async function handler(req, res) {
               .trim()
           : "";
 
-    if (!translatedPayload) {
-      throw new Error("Empty translation payload from OpenAI");
+    if (!output) {
+      throw new Error("Empty translation from OpenAI");
     }
 
-    const normalizedPayload = translatedPayload
-      .replace(/^```json\s*/i, "")
-      .replace(/^```\s*/i, "")
-      .replace(/\s*```$/, "")
-      .trim();
+    // Parse with delimiters — no JSON, no breakage from newlines
+    const subjectMatch = output.match(/===SUBJECT===\s*([\s\S]*?)\s*===BODY===/);
+    const bodyMatch = output.match(/===BODY===\s*([\s\S]*?)\s*===END===/);
 
-    let parsed;
-
-    try {
-      parsed = JSON.parse(normalizedPayload);
-    } catch {
-      // GPT sometimes returns literal newlines inside JSON string values — fix them
-      try {
-        const fixed = normalizedPayload.replace(
-          /"((?:[^"\\]|\\.)*)"/g,
-          (match, content) => '"' + content.replace(/\n/g, '\\n') + '"'
-        );
-        const jsonMatch = fixed.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          parsed = JSON.parse(jsonMatch[0]);
-        }
-      } catch { /* fall through */ }
-
-      // Last resort: regex extraction
-      if (!parsed) {
-        const subjectMatch = normalizedPayload.match(/"translatedSubject"\s*:\s*"((?:[^"\\]|\\.|[\n\r])*)"/);
-        const bodyMatch = normalizedPayload.match(/"translatedBody"\s*:\s*"((?:[^"\\]|\\.|[\n\r])*)"/);
-        if (subjectMatch && bodyMatch) {
-          parsed = {
-            translatedSubject: subjectMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"'),
-            translatedBody: bodyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"'),
-          };
-        } else {
-          throw new Error("Invalid translation JSON format");
-        }
-      }
-    }
-
-    const translatedSubject =
-      typeof parsed?.translatedSubject === "string" ? parsed.translatedSubject.trim() : "";
-    const translatedBody =
-      typeof parsed?.translatedBody === "string" ? parsed.translatedBody.trim() : "";
+    const translatedSubject = subjectMatch ? subjectMatch[1].trim() : "";
+    const translatedBody = bodyMatch ? bodyMatch[1].trim() : "";
 
     if (!translatedSubject || !translatedBody) {
-      throw new Error("Translated subject/body missing in response");
+      console.error("Delimiter parse failed. Raw output:", output);
+      throw new Error("Could not parse translation delimiters");
     }
 
     return res.status(200).json({
