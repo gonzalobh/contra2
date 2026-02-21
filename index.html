@@ -30,6 +30,50 @@
       --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --bg-body: #fafaf9;
+      --bg-surface: #f2f1f0;
+    }
+
+    /* Paleta Blanco y Negro */
+    html.palette-bw {
+      --bg-body: #f5f5f5;
+      --bg-surface: #eaeaea;
+    }
+
+    /* Paleta Blanca */
+    html.palette-white {
+      --bg-body: #ffffff;
+      --bg-surface: #ffffff;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f9f9f9;
+      --bg-tertiary: #f3f3f3;
+      --bg-main: #ffffff;
+      --bg-input: #ffffff;
+      --border-color: #e0e0e0;
+    }
+
+    /* Paleta Crema */
+    html.palette-cream {
+      --bg-body: #faf6f1;
+      --bg-surface: #f0ebe4;
+    }
+
+    /* Paleta Arena */
+    html.palette-sand {
+      --bg-body: #f7f3ec;
+      --bg-surface: #ece5da;
+    }
+
+    /* Paleta Verde crema */
+    html.palette-sage {
+      --bg-body: #f4f7f2;
+      --bg-surface: #e4ebe0;
+    }
+
+    /* Paleta Rosa crema */
+    html.palette-rose {
+      --bg-body: #f9f3f4;
+      --bg-surface: #f0e4e6;
     }
 
     html.dark {
@@ -158,9 +202,90 @@
       height: 16px;
     }
 
+    /* Palette selector */
+    .palette-wrapper {
+      position: relative;
+    }
+
+    .palette-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .palette-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .palette-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .palette-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 6px;
+      box-shadow: var(--shadow-md);
+      display: none;
+      gap: 6px;
+      z-index: 100;
+    }
+
+    .palette-menu:not([hidden]) {
+      display: flex;
+    }
+
+    .palette-option {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--border-color);
+      cursor: pointer;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .palette-option:hover {
+      transform: scale(1.1);
+    }
+
+    .palette-option.active {
+      border-color: var(--text-primary);
+    }
+
+    .palette-option .swatch-half {
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 100%;
+    }
+
+    .palette-option .swatch-half.left {
+      left: 0;
+    }
+
+    .palette-option .swatch-half.right {
+      right: 0;
+    }
+
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #fafaf9;
+      background: var(--bg-body);
       color: var(--text-primary);
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
@@ -182,7 +307,7 @@
     /* Header limpio estilo TrustMRR */
     header {
       padding: 1.5rem 2.5rem;
-      background: #fafaf9;
+      background: var(--bg-body);
       border-bottom: 0px solid var(--border-color);
       position: relative;
       z-index: 10;
@@ -280,7 +405,7 @@
 
     /* Panel izquierdo limpio */
     .left-panel {
-      background: #f2f1f0;
+      background: var(--bg-surface);
       padding: 0;
       border-radius: 20px;
       border: 1px solid var(--border-color);
@@ -461,7 +586,7 @@
       gap: 0;
       border-bottom: 1px solid var(--border-color);
       margin-bottom: 0;
-      background: #f2f1f0;
+      background: var(--bg-surface);
       border-radius: 12px 12px 0 0;
     }
 
@@ -822,7 +947,7 @@
     }
 
     .save-template-floating:hover {
-      background-color: #fafaf9;
+      background-color: var(--bg-body);
       color: var(--text-primary);
       border-color: var(--text-primary);
     }
@@ -1408,7 +1533,7 @@
     /* Panel derecho limpio */
     .right-panel {
       display: none;
-      background: #f2f1f0;
+      background: var(--bg-surface);
       padding: 28px 32px 32px 32px;
       margin-top: 4px;
       border-radius: 20px;
@@ -1443,7 +1568,7 @@
       margin-bottom: 1.25rem;
       position: sticky;
       top: -30px;
-      background: #f2f1f0;
+      background: var(--bg-surface);
       z-index: 100;
       padding-bottom: 0.75rem;
       margin-left: -32px;
@@ -2953,6 +3078,41 @@
             <i data-lucide="moon" id="themeIconMoon"></i>
             <i data-lucide="sun" id="themeIconSun" style="display:none"></i>
           </button>
+          <div class="palette-wrapper">
+            <button id="paletteBtn" class="palette-btn" type="button" aria-label="Cambiar paleta" title="Paleta de colores">
+              <i data-lucide="palette"></i>
+            </button>
+            <div class="palette-menu" id="paletteMenu" hidden>
+              <button class="palette-option active" data-palette="warm" type="button" title="Cálida">
+                <span class="swatch-half left" style="background: #fafaf9;"></span>
+                <span class="swatch-half right" style="background: #f2f1f0;"></span>
+              </button>
+              <button class="palette-option" data-palette="bw" type="button" title="Blanco y negro">
+                <span class="swatch-half left" style="background: #ffffff;"></span>
+                <span class="swatch-half right" style="background: #1d1d1f;"></span>
+              </button>
+              <button class="palette-option" data-palette="white" type="button" title="Blanca">
+                <span class="swatch-half left" style="background: #ffffff;"></span>
+                <span class="swatch-half right" style="background: #ffffff;"></span>
+              </button>
+              <button class="palette-option" data-palette="cream" type="button" title="Crema">
+                <span class="swatch-half left" style="background: #faf6f1;"></span>
+                <span class="swatch-half right" style="background: #f0ebe4;"></span>
+              </button>
+              <button class="palette-option" data-palette="sand" type="button" title="Arena">
+                <span class="swatch-half left" style="background: #f7f3ec;"></span>
+                <span class="swatch-half right" style="background: #ece5da;"></span>
+              </button>
+              <button class="palette-option" data-palette="sage" type="button" title="Verde crema">
+                <span class="swatch-half left" style="background: #f4f7f2;"></span>
+                <span class="swatch-half right" style="background: #e4ebe0;"></span>
+              </button>
+              <button class="palette-option" data-palette="rose" type="button" title="Rosa crema">
+                <span class="swatch-half left" style="background: #f9f3f4;"></span>
+                <span class="swatch-half right" style="background: #f0e4e6;"></span>
+              </button>
+            </div>
+          </div>
           <div class="profile-dropdown-wrapper">
             <button id="profileBtn" class="icon-btn header-icon-btn" type="button" aria-haspopup="true" aria-expanded="false">
               <i data-lucide="user"></i>
@@ -5811,6 +5971,8 @@ ${body}`.trim();
         closeVersionsMenu();
         closeTemplatesMenu();
         hideSelectionPopover();
+        const pm = document.getElementById('paletteMenu');
+        if (pm) pm.hidden = true;
       }
     });
 
@@ -5875,6 +6037,11 @@ ${body}`.trim();
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const isDark = stored ? stored === 'dark' : prefersDark;
       if (isDark) document.documentElement.classList.add('dark');
+      // Apply palette early to avoid flash
+      var savedPalette = localStorage.getItem('redactar-palette');
+      if (savedPalette && savedPalette !== 'warm') {
+        document.documentElement.classList.add('palette-' + savedPalette);
+      }
     })();
 
     function applyThemeIcons(isDark) {
@@ -5894,6 +6061,48 @@ ${body}`.trim();
         localStorage.setItem('redactar-theme', nowDark ? 'dark' : 'light');
         applyThemeIcons(nowDark);
         if (window.lucide) window.lucide.createIcons();
+      });
+
+      // Palette selector
+      const PALETTE_KEY = 'redactar-palette';
+      const PALETTE_CLASSES = ['palette-bw', 'palette-white', 'palette-cream', 'palette-sand', 'palette-sage', 'palette-rose'];
+      const paletteBtn = document.getElementById('paletteBtn');
+      const paletteMenu = document.getElementById('paletteMenu');
+      const paletteOptions = paletteMenu?.querySelectorAll('.palette-option');
+
+      function applyPalette(palette) {
+        PALETTE_CLASSES.forEach(cls => document.documentElement.classList.remove(cls));
+        if (palette !== 'warm') {
+          document.documentElement.classList.add('palette-' + palette);
+        }
+      }
+
+      // Apply saved palette on load
+      const savedPalette = localStorage.getItem(PALETTE_KEY) || 'warm';
+      applyPalette(savedPalette);
+      paletteOptions?.forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.palette === savedPalette);
+      });
+
+      paletteBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        paletteMenu.hidden = !paletteMenu.hidden;
+      });
+
+      paletteOptions?.forEach(opt => {
+        opt.addEventListener('click', () => {
+          const palette = opt.dataset.palette;
+          applyPalette(palette);
+          localStorage.setItem(PALETTE_KEY, palette);
+          paletteOptions.forEach(o => o.classList.toggle('active', o === opt));
+          paletteMenu.hidden = true;
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!paletteBtn?.contains(e.target) && !paletteMenu?.contains(e.target)) {
+          if (paletteMenu) paletteMenu.hidden = true;
+        }
       });
 
       // Escucha cambios del sistema (si no hay preferencia manual)
