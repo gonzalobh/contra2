@@ -742,6 +742,7 @@
       border-radius: 20px;
       cursor: pointer;
       transition: all 0.15s ease;
+      position: relative;
     }
 
     .config-control-btn:hover {
@@ -1130,6 +1131,7 @@
       cursor: pointer;
       transition: all 0.15s ease;
       flex-shrink: 0;
+      position: relative;
     }
 
     .btn-history-access:hover {
@@ -2417,56 +2419,55 @@
     }
 
     /* Tooltip custom con CSS */
-    .version-actions .icon-btn::before,
-    .restore-original-btn::before {
+    [data-tooltip]::before {
       content: attr(data-tooltip);
       position: absolute;
-      bottom: calc(100% + 8px);
+      bottom: calc(100% + 10px);
       left: 50%;
-      transform: translateX(-50%) translateY(4px);
-      background: #2b2b2b;
+      transform: translateX(-50%) scale(0.85);
+      transform-origin: bottom center;
+      background: #333333;
       color: #fff;
       font-size: 0.75rem;
-      padding: 0.375rem 0.625rem;
-      border-radius: 6px;
+      font-weight: 500;
+      padding: 0.45rem 0.85rem;
+      border-radius: 10px;
       white-space: nowrap;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.15s ease, transform 0.15s ease;
+      transition: opacity 0.2s ease, transform 0.2s ease;
       z-index: 100;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+      letter-spacing: 0.01em;
     }
 
-    /* Flecha del tooltip - triángulo CSS real */
-    .version-actions .icon-btn::after,
-    .restore-original-btn::after {
+    /* Flecha del tooltip */
+    [data-tooltip]::after {
       content: "";
       position: absolute;
-      bottom: calc(100% + 2px);
+      bottom: calc(100% + 4px);
       left: 50%;
-      transform: translateX(-50%);
+      transform: translateX(-50%) scale(0.85);
+      transform-origin: bottom center;
       width: 0;
       height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-top: 5px solid #2b2b2b;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 6px solid #333333;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.15s ease;
+      transition: opacity 0.2s ease, transform 0.2s ease;
       z-index: 99;
     }
 
-    .version-actions .icon-btn:hover::before,
-    .version-actions .icon-btn:hover::after,
-    .restore-original-btn:hover::before,
-    .restore-original-btn:hover::after {
+    [data-tooltip]:hover::before {
       opacity: 1;
-      transform: translateX(-50%) translateY(0);
+      transform: translateX(-50%) scale(1);
     }
 
-    .version-actions .icon-btn:hover::after,
-    .restore-original-btn:hover::after {
-      transform: translateX(-50%);
+    [data-tooltip]:hover::after {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
     }
 
     /* Ocultar el texto, solo mostrar íconos */
@@ -3060,6 +3061,217 @@
       outline: none;
     }
 
+    /* ── Situaciones Modal ── */
+    .sit-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1500;
+      padding: 1rem;
+    }
+
+    .sit-overlay:not([hidden]) {
+      display: flex;
+    }
+
+    .sit-modal {
+      width: min(520px, 100%);
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .sit-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem 0.75rem;
+    }
+
+    .sit-header strong {
+      font-size: 1rem;
+    }
+
+    .sit-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: 4px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sit-close:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .sit-close svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .sit-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 1.25rem;
+    }
+
+    .sit-tab {
+      background: none;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .sit-tab:hover {
+      color: var(--text-primary);
+    }
+
+    .sit-tab.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--text-primary);
+    }
+
+    .sit-body {
+      overflow-y: auto;
+      padding: 0.75rem 1.25rem 1.25rem;
+      flex: 1;
+    }
+
+    .sit-search-wrapper {
+      position: relative;
+      padding: 0.75rem 1.25rem 0;
+    }
+
+    .sit-search-icon {
+      position: absolute;
+      left: 1.85rem;
+      top: 50%;
+      transform: translateY(-20%);
+      width: 14px;
+      height: 14px;
+      color: var(--text-tertiary);
+      pointer-events: none;
+    }
+
+    .sit-search {
+      width: 100%;
+      padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .sit-search:focus {
+      border-color: var(--text-secondary);
+    }
+
+    .sit-search::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .sit-no-results {
+      text-align: center;
+      color: var(--text-tertiary);
+      font-size: 0.8rem;
+      padding: 2rem 0;
+    }
+
+    .sit-category {
+      margin-bottom: 0.25rem;
+    }
+
+    .sit-cat-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 0.6rem 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-primary);
+      border-radius: 8px;
+      transition: background 0.12s;
+    }
+
+    .sit-cat-btn:hover {
+      background: var(--bg-secondary);
+    }
+
+    .sit-cat-btn .sit-chevron {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.2s ease;
+      color: var(--text-tertiary);
+      flex-shrink: 0;
+    }
+
+    .sit-cat-btn.open .sit-chevron {
+      transform: rotate(90deg);
+    }
+
+    .sit-cat-btn .sit-cat-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: var(--text-secondary);
+    }
+
+    .sit-items {
+      display: none;
+      padding: 0.125rem 0 0.375rem 1.75rem;
+    }
+
+    .sit-items.open {
+      display: block;
+    }
+
+    .sit-item {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      padding: 0.45rem 0.6rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background 0.12s, color 0.12s;
+      line-height: 1.4;
+    }
+
+    .sit-item:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
     @media (max-width: 640px) {
       .input-pair {
         flex-direction: column;
@@ -3154,7 +3366,7 @@
               <label class="input-label" for="instruction">¿Qué email quieres enviar?</label>
               <div class="instruction-header-actions">
                 <div class="config-control-wrapper">
-                  <button id="regionBtn" class="config-control-btn" type="button" aria-haspopup="true" aria-expanded="false">
+                  <button id="regionBtn" class="config-control-btn" type="button" data-tooltip="País" aria-haspopup="true" aria-expanded="false">
                     <span id="regionLabel">Internacional</span>
                     <i data-lucide="chevron-down"></i>
                   </button>
@@ -3186,12 +3398,15 @@
                   </div>
                 </div>
                 <div class="config-control-wrapper" style="position: relative;">
-                  <button id="templatesBtn" class="btn-history-access" type="button" title="Plantillas" aria-haspopup="true" aria-expanded="false">
+                  <button id="templatesBtn" class="btn-history-access" type="button" title="Plantillas" data-tooltip="Plantillas" aria-haspopup="true" aria-expanded="false">
                     <i data-lucide="folder"></i>
                   </button>
                   <div class="custom-select-menu" id="templatesMenu" role="menu" hidden></div>
                 </div>
-                <button id="historyBtn" class="btn-history-access" type="button" title="Ver historial">
+                <button id="situacionesBtn" class="btn-history-access" type="button" title="Situaciones" data-tooltip="Situaciones">
+                  <i data-lucide="lightbulb"></i>
+                </button>
+                <button id="historyBtn" class="btn-history-access" type="button" title="Ver historial" data-tooltip="Historial">
                   <i data-lucide="history"></i>
                 </button>
               </div>
@@ -3201,7 +3416,7 @@
             <div class="config-controls-row">
               <!-- Formalidad Control -->
               <div class="config-control-wrapper">
-                <button id="formalidadBtn" class="config-control-btn" type="button" aria-haspopup="true" aria-expanded="false">
+                <button id="formalidadBtn" class="config-control-btn" type="button" data-tooltip="Formalidad" aria-haspopup="true" aria-expanded="false">
                   <span id="formalidadLabel">Formal</span>
                   <i data-lucide="chevron-down"></i>
                 </button>
@@ -3219,7 +3434,7 @@
 
               <!-- Contexto Control -->
               <div class="config-control-wrapper">
-                <button id="contextoBtn" class="config-control-btn" type="button" aria-haspopup="true" aria-expanded="false">
+                <button id="contextoBtn" class="config-control-btn" type="button" data-tooltip="Contexto" aria-haspopup="true" aria-expanded="false">
                   <span id="contextoLabel">Profesional</span>
                   <i data-lucide="chevron-down"></i>
                 </button>
@@ -3307,6 +3522,25 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Situaciones Modal -->
+  <div id="sitOverlay" class="sit-overlay" hidden>
+    <div class="sit-modal">
+      <div class="sit-header">
+        <strong>Situaciones</strong>
+        <button class="sit-close" id="sitCloseBtn" type="button"><i data-lucide="x"></i></button>
+      </div>
+      <div class="sit-tabs">
+        <button class="sit-tab active" data-scope="pro" type="button"><i data-lucide="briefcase" style="width:14px;height:14px;"></i> Profesional</button>
+        <button class="sit-tab" data-scope="per" type="button"><i data-lucide="house" style="width:14px;height:14px;"></i> Personal</button>
+      </div>
+      <div class="sit-search-wrapper">
+        <i data-lucide="search" class="sit-search-icon"></i>
+        <input type="text" id="sitSearch" class="sit-search" placeholder="Buscar situación…" autocomplete="off">
+      </div>
+      <div class="sit-body" id="sitBody"></div>
     </div>
   </div>
 
@@ -4361,6 +4595,206 @@
       templatesBtn.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
       templatesMenu.hidden = isExpanded;
     }
+
+    /* ── Situaciones ── */
+    const SITUACIONES = {
+      pro: [
+        { cat: 'Jefe / Superiores', icon: 'briefcase', items: [
+          { label: 'Pedir un aumento de sueldo', prompt: 'Escribir email a mi jefe pidiendo un aumento de sueldo. Tono profesional y seguro, fundamentando con logros y contribuciones al equipo.' },
+          { label: 'Pedir un ascenso', prompt: 'Escribir email solicitando un ascenso a mi superior. Tono profesional, mencionando resultados y crecimiento en el puesto actual.' },
+          { label: 'Rechazar una tarea que no me corresponde', prompt: 'Escribir email rechazando educadamente una tarea que no corresponde a mi rol. Tono diplomático pero claro, ofreciendo redirigir a la persona indicada.' },
+          { label: 'Pedir vacaciones en mal momento', prompt: 'Escribir email pidiendo vacaciones en un periodo complicado para el equipo. Tono respetuoso, proponiendo soluciones para cubrir mi ausencia.' },
+          { label: 'Avisar que estoy sobrecargado', prompt: 'Escribir email informando a mi jefe que tengo demasiada carga de trabajo. Tono constructivo, pidiendo ayuda para priorizar o redistribuir tareas.' },
+          { label: 'Reportar un error grave que cometí', prompt: 'Escribir email informando que cometí un error importante en el trabajo. Tono honesto y proactivo, explicando qué pasó y proponiendo solución.' },
+          { label: 'Pedir trabajar remoto', prompt: 'Escribir email solicitando modalidad de trabajo remoto. Tono profesional, argumentando productividad y proponiendo un periodo de prueba.' },
+          { label: 'Expresar desacuerdo con una decisión', prompt: 'Escribir email expresando mi desacuerdo con una decisión tomada por mi superior. Tono respetuoso y constructivo, proponiendo alternativa.' },
+        ]},
+        { cat: 'Compañeros', icon: 'users', items: [
+          { label: 'Alguien se lleva el crédito de mi trabajo', prompt: 'Escribir email a un compañero que se atribuyó el crédito de mi trabajo. Tono firme pero profesional, planteando la situación con hechos.' },
+          { label: 'Pedir que deje de interrumpirme en reuniones', prompt: 'Escribir email a un compañero que me interrumpe constantemente en reuniones. Tono amable pero directo, pidiendo que respete los turnos.' },
+          { label: 'Pedir que cumpla con su parte del trabajo', prompt: 'Escribir email a un compañero que no está cumpliendo con su parte del proyecto. Tono cooperativo pero firme, pidiendo compromiso con fechas.' },
+          { label: 'Reportar comportamiento inapropiado', prompt: 'Escribir email reportando un comportamiento inapropiado de un compañero. Tono formal y objetivo, describiendo los hechos sin exagerar.' },
+        ]},
+        { cat: 'Clientes', icon: 'target', items: [
+          { label: 'Subir precios', prompt: 'Escribir email informando a un cliente que los precios subirán. Tono profesional, explicando las razones y el valor que recibe.' },
+          { label: 'Dar malas noticias (retraso, problema)', prompt: 'Escribir email informando a un cliente sobre un retraso o problema en la entrega. Tono transparente, disculpándose y dando nueva fecha.' },
+          { label: 'Terminar relación comercial', prompt: 'Escribir email terminando la relación comercial con un cliente. Tono profesional y respetuoso, agradeciendo la colaboración y ofreciendo transición.' },
+          { label: 'Rechazar un proyecto o solicitud', prompt: 'Escribir email rechazando un proyecto o solicitud de un cliente. Tono educado, explicando las razones y sugiriendo alternativas si es posible.' },
+          { label: 'Pedir más tiempo para entregar', prompt: 'Escribir email pidiendo una extensión de plazo al cliente. Tono profesional, explicando la situación y comprometiéndose con nueva fecha.' },
+          { label: 'Disculparse por un error del equipo', prompt: 'Escribir email disculpándose con un cliente por un error del equipo. Tono humilde y profesional, explicando la corrección y medidas preventivas.' },
+          { label: 'Explicar un cargo extra en la factura', prompt: 'Escribir email justificando un cargo adicional en la factura. Tono claro y profesional, detallando el trabajo extra realizado.' },
+        ]},
+        { cat: 'Cobros y pagos', icon: 'wallet', items: [
+          { label: 'Primer recordatorio amable', prompt: 'Escribir primer recordatorio de pago de factura vencida. Tono amable y cordial, asumiendo que pudo ser un olvido.' },
+          { label: 'Segundo aviso más firme', prompt: 'Escribir segundo aviso de cobro de factura vencida. Tono firme pero profesional, recordando las condiciones acordadas.' },
+          { label: 'Último aviso antes de acciones legales', prompt: 'Escribir último aviso de cobro antes de tomar acciones legales. Tono formal y serio, dando plazo final y mencionando las consecuencias.' },
+          { label: 'Cobrar a un conocido profesional', prompt: 'Escribir email cobrando a alguien que conozco personalmente por un servicio profesional. Tono amistoso pero claro sobre la obligación de pago.' },
+          { label: 'Negociar un plan de pagos', prompt: 'Escribir email proponiendo un plan de pagos a un deudor. Tono comprensivo pero claro, con fechas y montos específicos.' },
+        ]},
+        { cat: 'Empleo', icon: 'file-text', items: [
+          { label: 'Renunciar en buenos términos', prompt: 'Escribir email de renuncia en buenos términos. Tono agradecido y profesional, ofreciendo ayuda con la transición.' },
+          { label: 'Renunciar en malos términos', prompt: 'Escribir email de renuncia cuando la experiencia fue negativa. Tono profesional y breve, sin entrar en conflictos pero siendo claro.' },
+          { label: 'Rechazar una oferta de trabajo', prompt: 'Escribir email rechazando una oferta de trabajo. Tono agradecido y respetuoso, dejando la puerta abierta para el futuro.' },
+          { label: 'Pedir feedback tras ser rechazado', prompt: 'Escribir email pidiendo retroalimentación después de no ser seleccionado para un puesto. Tono profesional y agradecido.' },
+          { label: 'Despedir a un empleado', prompt: 'Escribir email comunicando un despido. Tono respetuoso y claro, agradeciendo la contribución y explicando los próximos pasos.' },
+          { label: 'No renovar un contrato', prompt: 'Escribir email informando que no se renovará un contrato. Tono profesional, agradeciendo el trabajo y explicando la decisión.' },
+          { label: 'Dar feedback negativo a un subordinado', prompt: 'Escribir email dando retroalimentación negativa a un empleado. Tono constructivo, señalando el problema con ejemplos y proponiendo mejoras.' },
+        ]},
+        { cat: 'Proveedores / Socios', icon: 'building-2', items: [
+          { label: 'Rechazar una propuesta o cotización', prompt: 'Escribir email rechazando una propuesta o cotización de un proveedor. Tono educado, explicando brevemente la razón.' },
+          { label: 'Negociar un descuento', prompt: 'Escribir email negociando un descuento con un proveedor. Tono profesional y estratégico, fundamentando la solicitud.' },
+          { label: 'Quejarse por mal servicio', prompt: 'Escribir email de queja a un proveedor por mal servicio. Tono firme y específico, describiendo el problema y pidiendo solución.' },
+          { label: 'Cancelar un contrato', prompt: 'Escribir email cancelando un contrato con un proveedor. Tono formal, mencionando las condiciones de cancelación acordadas.' },
+          { label: 'Pedir un reembolso', prompt: 'Escribir email solicitando reembolso a un proveedor. Tono firme pero educado, explicando el motivo y adjuntando evidencia.' },
+        ]},
+      ],
+      per: [
+        { cat: 'Familia', icon: 'house', items: [
+          { label: 'Poner límites a un familiar entrometido', prompt: 'Escribir email o mensaje a un familiar que se entromete en mi vida. Tono cariñoso pero firme, poniendo límites claros con respeto.' },
+          { label: 'Rechazar una invitación familiar sin drama', prompt: 'Escribir mensaje rechazando una invitación familiar. Tono cariñoso y breve, sin dar excusas exageradas.' },
+          { label: 'Que dejen de preguntar por mi vida personal', prompt: 'Escribir mensaje pidiendo a familiares que dejen de preguntar sobre mi vida sentimental o planes de hijos. Tono amable pero claro.' },
+          { label: 'Cobrar dinero a un familiar', prompt: 'Escribir mensaje a un familiar que me debe dinero. Tono delicado pero directo, pidiendo que me devuelva lo prestado.' },
+          { label: 'Decir que no iré a un evento familiar', prompt: 'Escribir mensaje avisando que no asistiré a una reunión o evento familiar importante. Tono empático, sin culpa.' },
+          { label: 'Pedir espacio a mis padres', prompt: 'Escribir mensaje a mis padres pidiendo más espacio y autonomía. Tono respetuoso y amoroso, explicando mi necesidad.' },
+        ]},
+        { cat: 'Amigos', icon: 'heart-handshake', items: [
+          { label: 'Cobrar dinero prestado', prompt: 'Escribir mensaje a un amigo que me debe dinero. Tono casual pero directo, pidiendo que me devuelva lo prestado sin que sea incómodo.' },
+          { label: 'Cancelar planes sin quedar mal', prompt: 'Escribir mensaje cancelando planes con amigos. Tono sincero y breve, proponiendo reagendar.' },
+          { label: 'Dejar de participar en algo (grupo, viaje)', prompt: 'Escribir mensaje avisando que me salgo de un plan grupal (viaje, proyecto, grupo). Tono honesto sin dar excesivas explicaciones.' },
+          { label: 'Confrontar a un amigo que habló mal de mí', prompt: 'Escribir mensaje a un amigo que habló mal de mí a mis espaldas. Tono directo pero sin agresividad, buscando aclarar.' },
+          { label: 'Distanciarse de alguien sin pelear', prompt: 'Escribir mensaje para tomar distancia de una amistad. Tono amable y honesto, sin culpar ni generar conflicto.' },
+          { label: 'Rechazar ser padrino/testigo/dama de honor', prompt: 'Escribir mensaje rechazando ser padrino, testigo o dama de honor. Tono cariñoso, explicando que no puedo asumir ese compromiso.' },
+          { label: 'Decir que no puedo prestar dinero', prompt: 'Escribir mensaje rechazando prestar dinero a un amigo. Tono empático pero claro, sin culpa ni promesas falsas.' },
+        ]},
+        { cat: 'Pareja', icon: 'heart', items: [
+          { label: 'Hablar de algo que me molesta', prompt: 'Escribir mensaje a mi pareja sobre algo que me molesta. Tono honesto y calmado, sin acusar, usando "me siento" en vez de "tú haces".' },
+          { label: 'Pedir más espacio personal', prompt: 'Escribir mensaje pidiendo más espacio personal a mi pareja. Tono amoroso y claro, explicando que no es distanciamiento sino necesidad.' },
+          { label: 'Proponer dividir gastos diferente', prompt: 'Escribir mensaje a mi pareja proponiendo un cambio en cómo dividimos los gastos. Tono práctico y justo, sin generar tensión.' },
+          { label: 'Plantear que algo no funciona', prompt: 'Escribir mensaje a mi pareja planteando que hay algo en la relación que no está funcionando. Tono maduro y constructivo, buscando solución juntos.' },
+          { label: 'Pedir que cambie un hábito', prompt: 'Escribir mensaje a mi pareja pidiendo que cambie un hábito que me afecta. Tono comprensivo pero honesto, sin sonar como reclamo.' },
+        ]},
+        { cat: 'Vecinos / Comunidad', icon: 'landmark', items: [
+          { label: 'Quejarse por ruido', prompt: 'Escribir mensaje o nota a un vecino quejándome por ruido excesivo. Tono educado pero directo, pidiendo que modere el volumen.' },
+          { label: 'Pedir que recojan los desechos de su mascota', prompt: 'Escribir mensaje a un vecino pidiendo que recoja los desechos de su mascota. Tono cortés pero firme.' },
+          { label: 'Resolver disputa por espacio común', prompt: 'Escribir mensaje a un vecino sobre un conflicto por estacionamiento o espacio común. Tono conciliador, proponiendo acuerdo.' },
+          { label: 'Rechazar participar en junta de vecinos', prompt: 'Escribir mensaje rechazando participar en la junta de vecinos. Tono amable y breve, sin dar excusas largas.' },
+          { label: 'Reclamar un daño causado', prompt: 'Escribir mensaje a un vecino reclamando un daño que causó a mi propiedad. Tono firme pero educado, pidiendo reparación.' },
+        ]},
+        { cat: 'Servicios / Comercios', icon: 'shopping-bag', items: [
+          { label: 'Quejarse por mal servicio', prompt: 'Escribir email de queja formal por mal servicio en restaurante, hotel o tienda. Tono firme y específico, pidiendo compensación.' },
+          { label: 'Pedir reembolso de una compra', prompt: 'Escribir email pidiendo reembolso de una compra insatisfactoria. Tono claro y firme, citando políticas de devolución.' },
+          { label: 'Cancelar suscripción difícil de cancelar', prompt: 'Escribir email exigiendo la cancelación de una suscripción que dificultan cancelar. Tono directo e inequívoco.' },
+          { label: 'Reclamar garantía', prompt: 'Escribir email reclamando la garantía de un producto defectuoso. Tono formal, incluyendo fecha de compra y descripción del fallo.' },
+        ]},
+      ]
+    };
+
+    const sitOverlay = document.getElementById('sitOverlay');
+    const sitBody = document.getElementById('sitBody');
+    const sitCloseBtn = document.getElementById('sitCloseBtn');
+    const sitSearch = document.getElementById('sitSearch');
+    const sitTabs = document.querySelectorAll('.sit-tab');
+    let sitScope = 'pro';
+
+    function renderSituaciones(scope, filter) {
+      const q = (filter || '').toLowerCase().trim();
+      const data = SITUACIONES[scope];
+      sitBody.innerHTML = '';
+      let totalMatches = 0;
+
+      data.forEach((cat) => {
+        const matchedItems = q
+          ? cat.items.filter(it => it.label.toLowerCase().includes(q) || cat.cat.toLowerCase().includes(q))
+          : cat.items;
+
+        if (matchedItems.length === 0) return;
+        totalMatches += matchedItems.length;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'sit-category';
+
+        const btn = document.createElement('button');
+        btn.className = 'sit-cat-btn' + (q ? ' open' : '');
+        btn.type = 'button';
+        btn.innerHTML = `<svg class="sit-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg><i data-lucide="${cat.icon}" class="sit-cat-icon"></i> ${cat.cat}`;
+
+        const items = document.createElement('div');
+        items.className = 'sit-items' + (q ? ' open' : '');
+
+        matchedItems.forEach(it => {
+          const item = document.createElement('button');
+          item.className = 'sit-item';
+          item.type = 'button';
+          item.textContent = it.label;
+          item.addEventListener('click', () => {
+            instructionEl.value = it.prompt;
+            instructionEl.dispatchEvent(new Event('input', { bubbles: true }));
+            closeSituaciones();
+            instructionEl.focus();
+          });
+          items.appendChild(item);
+        });
+
+        btn.addEventListener('click', () => {
+          btn.classList.toggle('open');
+          items.classList.toggle('open');
+        });
+
+        wrap.appendChild(btn);
+        wrap.appendChild(items);
+        sitBody.appendChild(wrap);
+      });
+
+      if (totalMatches === 0 && q) {
+        sitBody.innerHTML = '<div class="sit-no-results">Sin resultados para "' + q.replace(/</g, '&lt;') + '"</div>';
+      }
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function openSituaciones() {
+      if (sitSearch) sitSearch.value = '';
+      renderSituaciones(sitScope, '');
+      sitOverlay.hidden = false;
+      if (window.lucide) window.lucide.createIcons();
+      setTimeout(() => sitSearch?.focus(), 50);
+    }
+
+    function closeSituaciones() {
+      sitOverlay.hidden = true;
+    }
+
+    sitSearch?.addEventListener('input', () => {
+      const q = sitSearch.value;
+      if (q.trim().length > 0) {
+        const qLower = q.toLowerCase().trim();
+        const hasProResults = SITUACIONES.pro.some(c => c.items.some(it => it.label.toLowerCase().includes(qLower) || c.cat.toLowerCase().includes(qLower)));
+        const hasPerResults = SITUACIONES.per.some(c => c.items.some(it => it.label.toLowerCase().includes(qLower) || c.cat.toLowerCase().includes(qLower)));
+        if (!hasProResults && hasPerResults && sitScope === 'pro') {
+          sitScope = 'per';
+          sitTabs.forEach(t => t.classList.toggle('active', t.dataset.scope === 'per'));
+        } else if (hasProResults && !hasPerResults && sitScope === 'per') {
+          sitScope = 'pro';
+          sitTabs.forEach(t => t.classList.toggle('active', t.dataset.scope === 'pro'));
+        }
+      }
+      renderSituaciones(sitScope, q);
+    });
+
+    sitCloseBtn?.addEventListener('click', closeSituaciones);
+    sitOverlay?.addEventListener('click', (e) => {
+      if (e.target === sitOverlay) closeSituaciones();
+    });
+
+    sitTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        sitScope = tab.dataset.scope;
+        sitTabs.forEach(t => t.classList.toggle('active', t === tab));
+        renderSituaciones(sitScope, sitSearch?.value || '');
+      });
+    });
+
+    document.getElementById('situacionesBtn')?.addEventListener('click', openSituaciones);
 
     function createHistoryId() {
       if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -5970,6 +6404,7 @@ ${body}`.trim();
         closeAllStrategyMenus();
         closeVersionsMenu();
         closeTemplatesMenu();
+        closeSituaciones();
         hideSelectionPopover();
         const pm = document.getElementById('paletteMenu');
         if (pm) pm.hidden = true;
