@@ -113,7 +113,7 @@
 
     html.dark .config-control-btn,
     html.dark .custom-select-btn {
-      background: #2c2c2e !important;
+      background: transparent !important;
       border-color: #3a3a3c !important;
       color: var(--text-secondary) !important;
     }
@@ -525,11 +525,11 @@
 
     .input-label {
       display: block;
-      font-size: 1rem;
-      font-weight: 600;
+      font-size: 1.25rem;
+      font-weight: 700;
       color: var(--text-primary);
       margin-bottom: 0.625rem;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.02em;
     }
 
     /* Inputs estilo TrustMRR */
@@ -538,7 +538,7 @@
     select {
       width: 100%;
       font-family: inherit;
-      font-size: 1.1rem;
+      font-size: 0.9375rem;
       color: #1d1d1f;
       background: var(--bg-primary);
       border: 1px solid var(--border-color);
@@ -611,7 +611,7 @@
       font-size: 0.8125rem;
       font-weight: 500;
       color: var(--text-secondary);
-      background: var(--bg-primary);
+      background: transparent;
       border: 1px solid var(--border-color);
       padding: 0.5rem 0.75rem;
       border-radius: 20px;
@@ -640,7 +640,8 @@
     #templatesMenu {
       position: absolute;
       top: calc(100% + 8px);
-      left: 0;
+      right: 0;
+      left: auto;
       min-width: 200px;
     }
 
@@ -833,9 +834,9 @@
       width: 100%;
       max-width: 92%;
       min-height: 88px;
-      padding: 14px 16px;
+      padding: 20px;
       color: #6b7280;
-      font-size: 1.1rem;
+      font-size: 0.9375rem;
       font-style: normal;
       line-height: 1.5;
       opacity: 0;
@@ -998,8 +999,8 @@
       width: 44px;
       height: 44px;
       border-radius: 12px;
-      border: 1px solid var(--border-color);
-      background: var(--bg-secondary);
+      border: none;
+      background: transparent;
       color: var(--text-secondary);
       cursor: pointer;
       transition: all 0.15s ease;
@@ -1009,7 +1010,6 @@
     .btn-history-access:hover {
       background: var(--bg-tertiary);
       color: var(--text-primary);
-      border-color: var(--text-secondary);
     }
 
     .btn-history-access i {
@@ -3025,6 +3025,12 @@
                     </button>
                   </div>
                 </div>
+                <div class="config-control-wrapper" style="position: relative;">
+                  <button id="templatesBtn" class="btn-history-access" type="button" title="Plantillas" aria-haspopup="true" aria-expanded="false">
+                    <i data-lucide="folder"></i>
+                  </button>
+                  <div class="custom-select-menu" id="templatesMenu" role="menu" hidden></div>
+                </div>
                 <button id="historyBtn" class="btn-history-access" type="button" title="Ver historial">
                   <i data-lucide="history"></i>
                 </button>
@@ -3067,15 +3073,6 @@
                     <i data-lucide="check"></i>
                   </button>
                 </div>
-              </div>
-
-              <!-- Plantilla Button -->
-              <div class="config-control-wrapper">
-                <button id="templatesBtn" class="config-control-btn templates-btn" type="button" aria-haspopup="true" aria-expanded="false">
-                  <i data-lucide="folder"></i>
-                  <span>Plantillas</span>
-                </button>
-                <div class="custom-select-menu" id="templatesMenu" role="menu" hidden></div>
               </div>
             </div>
 
@@ -4158,6 +4155,16 @@
       if (!templatesMenu) return;
       const list = loadTemplates();
       templatesMenu.innerHTML = '';
+
+      if (list.length === 0) {
+        const empty = document.createElement('span');
+        empty.className = 'template-manage-btn';
+        empty.style.cursor = 'default';
+        empty.style.opacity = '0.5';
+        empty.textContent = 'Sin plantillas';
+        templatesMenu.appendChild(empty);
+        return;
+      }
 
       list.forEach((t) => {
         const btn = document.createElement('button');
